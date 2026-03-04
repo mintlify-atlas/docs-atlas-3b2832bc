@@ -1,0 +1,110 @@
+{
+  "projectType": "frontend",
+  "projectName": "DEV WEEK 2025",
+  "projectDescription": "Single-page React application for the annual DEV WEEK tech event organized by IESP Túpac Amaru",
+  "theme": "palm",
+  "primaryColor": "#fc0404",
+  "lightColor": "#fc7c7c",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart", "installation"]
+          },
+          {
+            "group": "Project Structure",
+            "pages": [
+              "structure/overview",
+              "structure/components",
+              "structure/styling",
+              "structure/animations"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "components/hero",
+              "components/schedule",
+              "components/speakers",
+              "components/livestreams",
+              "components/registration-form",
+              "components/sponsors",
+              "components/footer"
+            ]
+          },
+          {
+            "group": "Customization",
+            "pages": [
+              "customization/theme",
+              "customization/content",
+              "customization/assets"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/local-setup",
+              "development/building",
+              "development/testing"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Data Structures",
+            "pages": [
+              "reference/schedule-data",
+              "reference/speakers-data",
+              "reference/types"
+            ]
+          },
+          {
+            "group": "Animation System",
+            "pages": [
+              "reference/animations",
+              "reference/accessibility"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "reference/deployment",
+              "reference/seo-optimization"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Responsive single-page design with React 18 and TypeScript",
+    "Smooth animations powered by anime.js",
+    "Event schedule with countdown timer",
+    "Speaker showcase with filtering and search",
+    "Live stream integration with modal viewer",
+    "Registration form with localStorage persistence",
+    "CSS Module architecture with design system variables",
+    "Accessibility features (ARIA labels, keyboard navigation, reduced motion)",
+    "SEO optimization with meta tags and structured data"
+  ],
+  "publicApiSurface": [
+    "Hero component",
+    "CountdownClock component",
+    "Schedule component with diasEvento data structure",
+    "Speakers component with filtering",
+    "LiveStreams component with modal",
+    "RegistrationForm component with validation",
+    "Sponsors component",
+    "Footer component",
+    "Animation utilities: enterStagger, fadeInUp, slideInLeft, scaleIn, hoverLift, pulseAccent",
+    "CSS variables system: --morado, --plomo, --dorado color palette",
+    "Stream types and helpers"
+  ]
+}

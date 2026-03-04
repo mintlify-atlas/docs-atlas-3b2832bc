@@ -1,0 +1,344 @@
+---
+title: "TypeScript Type Definitions"
+description: "Complete reference for all TypeScript types and interfaces used in DEV WEEK 2025"
+---
+
+## Overview
+
+This page documents all TypeScript type definitions used in the DEV WEEK 2025 application. Types are organized across multiple files for better code organization.
+
+## Core Types (`src/types.ts`)
+
+### Actividad Type
+
+Defines the structure for individual activities within a day's schedule.
+
+```typescript
+export type Actividad = {
+  titulo: string;
+  hora: string;
+};
+```
+
+#### Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `titulo` | `string` | Yes | Activity title or name |
+| `hora` | `string` | Yes | Time slot (e.g., "11:00 – 12:00") |
+
+<Note>
+While the type definition only includes `titulo` and `hora`, the actual data may include an optional `subtitulo` field for additional context.
+</Note>
+
+### Dia Type
+
+Defines the structure for a complete event day.
+
+```typescript
+export type Dia = {
+  id: number;
+  nombre: string;
+  tema: string;
+  fecha: string;
+  hora: string;
+  descripcion: string;
+  actividades: Actividad[];
+  destacado: boolean;
+};
+```
+
+#### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `number` | Unique identifier for the day |
+| `nombre` | `string` | Display name (e.g., "Miércoles 10") |
+| `tema` | `string` | Main theme for the day |
+| `fecha` | `string` | Human-readable date |
+| `hora` | `string` | Overall time range for the day |
+| `descripcion` | `string` | Brief description of the day |
+| `actividades` | `Actividad[]` | Array of scheduled activities |
+| `destacado` | `boolean` | Whether the day is highlighted |
+
+## Stream Types (`src/types/stream.ts`)
+
+### StreamStatus Type
+
+Enum-like type for stream states.
+
+```typescript
+export type StreamStatus = "live" | "upcoming" | "recorded" | "scheduled";
+```
+
+#### Values
+
+- `"live"` - Stream is currently broadcasting
+- `"upcoming"` - Stream is scheduled but hasn't started
+- `"recorded"` - Stream has ended and recording is available
+- `"scheduled"` - Stream is planned for a future date
+
+### Platform Type
+
+Supported streaming platforms.
+
+```typescript
+export type Platform = "youtube" | "twitch" | "facebook" | "other";
+```
+
+#### Values
+
+- `"youtube"` - YouTube Live
+- `"twitch"` - Twitch streaming
+- `"facebook"` - Facebook Live
+- `"other"` - Custom or other platforms
+
+### Stream Interface
+
+Base interface for stream information.
+
+```typescript
+export interface Stream {
+  id: number;
+  title: string;
+  day: string;
+  date: string; // YYYY-MM-DD format
+  startTime: string; // HH:mm format (24h)
+  endTime: string; // HH:mm format (24h)
+  platform: Platform;
+  channelId?: string; // For YouTube channels or Twitch channels
+  videoId?: string; // For YouTube videos (live or recorded)
+  embedUrl?: string; // Custom embed URL if needed
+  description?: string;
+}
+```
+
+#### Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | `number` | Yes | Unique stream identifier |
+| `title` | `string` | Yes | Stream title |
+| `day` | `string` | Yes | Day name (e.g., "Miércoles 10") |
+| `date` | `string` | Yes | ISO date format (YYYY-MM-DD) |
+| `startTime` | `string` | Yes | 24-hour format (HH:mm) |
+| `endTime` | `string` | Yes | 24-hour format (HH:mm) |
+| `platform` | `Platform` | Yes | Streaming platform |
+| `channelId` | `string` | No | Platform channel identifier |
+| `videoId` | `string` | No | Video identifier (for YouTube) |
+| `embedUrl` | `string` | No | Custom embed URL |
+| `description` | `string` | No | Stream description |
+
+### StreamWithStatus Interface
+
+Extends `Stream` with real-time status information.
+
+```typescript
+export interface StreamWithStatus extends Stream {
+  status: StreamStatus;
+  timeUntilStart?: number; // milliseconds
+}
+```
+
+#### Additional Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `status` | `StreamStatus` | Yes | Current stream status |
+| `timeUntilStart` | `number` | No | Milliseconds until stream starts (for upcoming streams) |
+
+## Component-Specific Types
+
+### Speaker Interface (`src/components/Speakers.tsx`)
+
+Defines speaker information structure.
+
+```typescript
+interface Speaker {
+  id: number;
+  name: string;
+  role: string;
+  bio: string;
+  topic: string;
+  day: string;
+  time: string;
+  image: string;
+}
+```
+
+#### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `number` | Unique speaker identifier |
+| `name` | `string` | Full name |
+| `role` | `string` | Professional role or affiliation |
+| `bio` | `string` | Biography and expertise |
+| `topic` | `string` | Presentation topic |
+| `day` | `string` | Presentation day |
+| `time` | `string` | Presentation time slot |
+| `image` | `string` | Profile image path |
+
+## Usage Examples
+
+### Importing Types
+
+```typescript
+// Core types
+import type { Dia, Actividad } from './types';
+
+// Stream types
+import type { Stream, StreamWithStatus, StreamStatus, Platform } from './types/stream';
+
+// Component types
+import type { Speaker } from './components/Speakers';
+```
+
+### Type Guards
+
+```typescript
+// Check if stream is live
+function isLive(stream: StreamWithStatus): boolean {
+  return stream.status === "live";
+}
+
+// Check if day is highlighted
+function isHighlighted(day: Dia): boolean {
+  return day.destacado === true;
+}
+
+// Filter streams by platform
+function filterByPlatform(streams: Stream[], platform: Platform): Stream[] {
+  return streams.filter(stream => stream.platform === platform);
+}
+```
+
+### Working with Schedule Types
+
+```typescript
+import { diasEvento } from './data/schedule';
+import type { Dia, Actividad } from './types';
+
+// Type-safe access to schedule data
+const days: Dia[] = diasEvento;
+
+// Get all activities across all days
+const allActivities: Actividad[] = days.flatMap(day => day.actividades);
+
+// Find specific day
+const findDay = (id: number): Dia | undefined => {
+  return days.find(day => day.id === id);
+};
+```
+
+### Working with Stream Types
+
+```typescript
+import type { Stream, StreamWithStatus, StreamStatus } from './types/stream';
+
+// Create a stream object
+const stream: Stream = {
+  id: 1,
+  title: "DEV WEEK 2025 - Día 1",
+  day: "Miércoles 10",
+  date: "2025-12-10",
+  startTime: "10:50",
+  endTime: "13:00",
+  platform: "youtube",
+  videoId: "abc123",
+  description: "Inauguración y Gestión de TI"
+};
+
+// Add status information
+const liveStream: StreamWithStatus = {
+  ...stream,
+  status: "live",
+  timeUntilStart: 0
+};
+
+// Status helper
+function getStreamStatus(stream: Stream, currentTime: Date): StreamStatus {
+  const streamDateTime = new Date(`${stream.date}T${stream.startTime}`);
+  const endDateTime = new Date(`${stream.date}T${stream.endTime}`);
+  
+  if (currentTime < streamDateTime) {
+    return "upcoming";
+  } else if (currentTime >= streamDateTime && currentTime <= endDateTime) {
+    return "live";
+  } else {
+    return "recorded";
+  }
+}
+```
+
+### Working with Speaker Types
+
+```typescript
+import { SPEAKERS_DATA } from './components/Speakers';
+import type { Speaker } from './components/Speakers';
+
+// Type-safe speaker filtering
+function getSpeakersByDay(day: string): Speaker[] {
+  return SPEAKERS_DATA.filter(speaker => speaker.day === day);
+}
+
+// Search function with type safety
+function searchSpeakers(query: string): Speaker[] {
+  const lowerQuery = query.toLowerCase();
+  return SPEAKERS_DATA.filter(speaker => 
+    speaker.name.toLowerCase().includes(lowerQuery) ||
+    speaker.topic.toLowerCase().includes(lowerQuery) ||
+    speaker.bio.toLowerCase().includes(lowerQuery)
+  );
+}
+```
+
+## Type Relationships
+
+```mermaid
+graph TD
+    A[Dia] --> B[Actividad[]]
+    C[Stream] --> D[StreamWithStatus]
+    D --> E[StreamStatus]
+    C --> F[Platform]
+    G[Speaker] -.references.-> H[day: string]
+    A -.references.-> H
+```
+
+## Best Practices
+
+1. **Import Types Explicitly**
+   ```typescript
+   import type { Dia } from './types';  // Good
+   import { Dia } from './types';       // Works but less clear
+   ```
+
+2. **Use Type Annotations**
+   ```typescript
+   const day: Dia = diasEvento[0];  // Explicit type
+   const day = diasEvento[0];        // Type inferred
+   ```
+
+3. **Leverage Type Safety**
+   ```typescript
+   // TypeScript will catch errors
+   const stream: Stream = {
+     id: 1,
+     title: "Test",
+     platform: "invalid" // Error: not assignable to Platform
+   };
+   ```
+
+4. **Use Optional Chaining**
+   ```typescript
+   const description = stream.description ?? "No description available";
+   const videoId = stream.videoId;
+   ```
+
+## Notes
+
+- All date strings in `Stream` use ISO format (YYYY-MM-DD)
+- All time strings use 24-hour format (HH:mm)
+- The `Actividad` type definition doesn't include `subtitulo`, but the actual data may contain it
+- Stream types support multiple platforms for flexibility
+- Type definitions are exported for reuse across the application

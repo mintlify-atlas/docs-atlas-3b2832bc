@@ -1,0 +1,390 @@
+---
+title: 'Building for Production'
+description: 'Guide to building and optimizing the DEV WEEK 2025 application for production deployment'
+---
+
+## Production Build Process
+
+The project uses Vite as the build tool, which provides optimized production builds with code splitting, minification, and asset optimization.
+
+## Building the Application
+
+### Create Production Build
+
+Run the build command to create an optimized production bundle:
+
+```bash
+npm run build
+```
+
+This command:
+1. Runs TypeScript compilation (type checking)
+2. Bundles all JavaScript/TypeScript files
+3. Processes and optimizes CSS (including Tailwind)
+4. Minifies all code
+5. Generates hashed filenames for cache busting
+6. Optimizes assets (images, fonts, etc.)
+7. Creates source maps for debugging
+
+<Info>
+  The build process uses `vite build` under the hood, which is configured in `vite.config.ts`.
+</Info>
+
+### Build Output
+
+The production build is generated in the `dist/` directory:
+
+```
+dist/
+├── assets/
+│   ├── index-[hash].js      # Main JavaScript bundle
+│   ├── index-[hash].css     # Compiled CSS
+│   └── [other-assets]       # Images, fonts, etc.
+├── index.html               # Entry HTML file
+└── vite.svg                 # Vite logo (can be removed)
+```
+
+**Key Features:**
+
+- **Hashed Filenames**: All assets have content hashes for efficient caching
+- **Code Splitting**: Automatic chunking for better load performance
+- **Tree Shaking**: Unused code is eliminated
+- **Minification**: JavaScript and CSS are minified
+- **Asset Optimization**: Images and other assets are optimized
+
+## Build Configuration
+
+The build is configured in `vite.config.ts`:
+
+```typescript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+  },
+});
+```
+
+### Key Configuration Options
+
+**React Plugin**
+
+The `@vitejs/plugin-react` provides:
+- JSX transformation
+- React Fast Refresh in development
+- Automatic JSX runtime
+
+**Dependency Optimization**
+
+`lucide-react` is excluded from pre-bundling to avoid issues with icon imports. This is a known optimization for this library.
+
+### Customizing Build Output
+
+You can customize the build output by adding options to `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    outDir: 'dist',              // Output directory
+    assetsDir: 'assets',         // Assets directory
+    sourcemap: true,             // Generate source maps
+    minify: 'esbuild',           // Minification method
+    chunkSizeWarningLimit: 1000, // Chunk size warning (KB)
+    rollupOptions: {
+      output: {
+        manualChunks: {          // Manual code splitting
+          'react-vendor': ['react', 'react-dom'],
+          'anime-vendor': ['animejs']
+        }
+      }
+    }
+  }
+});
+```
+
+## Build Optimization
+
+### Analyzing Bundle Size
+
+To analyze your bundle size, install and use the rollup visualizer:
+
+```bash
+npm install --save-dev rollup-plugin-visualizer
+```
+
+Add to `vite.config.ts`:
+
+```typescript
+import { visualizer } from 'rollup-plugin-visualizer';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    visualizer({ open: true })
+  ]
+});
+```
+
+Then run `npm run build` to generate an interactive bundle size visualization.
+
+### Optimization Strategies
+
+**1. Code Splitting**
+
+Vite automatically splits code at dynamic import boundaries:
+
+```tsx
+// Lazy load components
+const Speakers = lazy(() => import('./components/Speakers'));
+const LiveStreams = lazy(() => import('./components/LiveStreams'));
+```
+
+**2. Asset Optimization**
+
+Images and assets are automatically optimized. For better control:
+
+```bash
+npm install --save-dev vite-plugin-image-optimizer
+```
+
+**3. CSS Optimization**
+
+Tailwind CSS is automatically purged of unused classes during build. Ensure your content paths in `tailwind.config.js` are correct:
+
+```javascript
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  // ...
+};
+```
+
+**4. Environment-Specific Code**
+
+Use environment variables for build-time optimizations:
+
+```typescript
+if (import.meta.env.PROD) {
+  // Production-only code
+}
+
+if (import.meta.env.DEV) {
+  // Development-only code
+}
+```
+
+## Preview Production Build
+
+Before deploying, preview the production build locally:
+
+```bash
+npm run preview
+```
+
+This command:
+1. Serves the built files from `dist/`
+2. Runs a local server (default: `http://localhost:4173`)
+3. Simulates production environment
+
+<Tip>
+  Always preview your production build locally before deploying to catch any build-specific issues.
+</Tip>
+
+### Preview Options
+
+Customize the preview server in `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  preview: {
+    port: 8080,
+    host: true,  // Listen on all addresses
+    strictPort: true,
+    open: true   // Auto-open browser
+  }
+});
+```
+
+## Type Checking
+
+Before building, ensure there are no TypeScript errors:
+
+```bash
+npm run typecheck
+```
+
+This runs `tsc --noEmit` using `tsconfig.app.json` configuration.
+
+<Warning>
+  The build process includes type checking. TypeScript errors will fail the build.
+</Warning>
+
+## Linting
+
+Run ESLint to catch code quality issues:
+
+```bash
+npm run lint
+```
+
+Fix auto-fixable issues:
+
+```bash
+npm run lint -- --fix
+```
+
+## Deployment Preparation
+
+### Pre-Deployment Checklist
+
+Before deploying to production:
+
+- [ ] Run `npm run typecheck` - No TypeScript errors
+- [ ] Run `npm run lint` - No linting errors
+- [ ] Run `npm run build` - Build completes successfully
+- [ ] Run `npm run preview` - Preview works correctly
+- [ ] Test on multiple browsers and devices
+- [ ] Verify all environment variables are set
+- [ ] Check that analytics and tracking are configured
+- [ ] Ensure all placeholder content is replaced
+- [ ] Test form submissions and API integrations
+- [ ] Verify live stream URLs are correct
+- [ ] Check mobile responsiveness
+- [ ] Test accessibility with screen readers
+
+### Environment Variables for Production
+
+Create a `.env.production` file for production-specific variables:
+
+```bash
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-production-key
+VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+```
+
+<Note>
+  Never commit `.env.production` to version control. Add it to `.gitignore`.
+</Note>
+
+### Build for Different Environments
+
+Vite automatically loads environment files:
+
+- `.env` - Loaded in all cases
+- `.env.local` - Loaded in all cases, ignored by git
+- `.env.production` - Only loaded in production
+- `.env.development` - Only loaded in development
+
+## Static File Handling
+
+Files in the `public/` directory are served at the root path:
+
+```
+public/
+├── placeholder-speaker.jpg  # Accessible as /placeholder-speaker.jpg
+├── favicon.ico
+└── robots.txt
+```
+
+Reference them in code:
+
+```tsx
+<img src="/placeholder-speaker.jpg" alt="Speaker" />
+```
+
+## Build Troubleshooting
+
+### Build Fails with TypeScript Errors
+
+1. Run `npm run typecheck` to see all errors
+2. Fix type errors in your code
+3. Ensure all dependencies are properly typed
+4. Check `tsconfig.app.json` configuration
+
+### Memory Issues During Build
+
+If the build fails with out-of-memory errors:
+
+```bash
+NODE_OPTIONS="--max-old-space-size=4096" npm run build
+```
+
+### CSS Not Purged Properly
+
+1. Check `tailwind.config.js` content paths
+2. Ensure all component files are included
+3. Avoid dynamic class names:
+
+```tsx
+// ❌ Bad - won't be detected
+<div className={`text-${color}-500`}>
+
+// ✅ Good - will be detected
+<div className={color === 'blue' ? 'text-blue-500' : 'text-red-500'}>
+```
+
+### Large Bundle Size
+
+1. Use the bundle analyzer to identify large dependencies
+2. Implement code splitting with dynamic imports
+3. Remove unused dependencies
+4. Consider lighter alternatives for heavy libraries
+
+### Assets Not Loading
+
+1. Ensure assets are in the `public/` directory or properly imported
+2. Check asset paths are correct (relative to `public/`)
+3. Verify base URL configuration in `vite.config.ts` if deploying to subdirectory
+
+## Deployment Platforms
+
+The `dist/` directory can be deployed to any static hosting platform:
+
+<CardGroup cols={2}>
+  <Card title="Vercel" icon="triangle">
+    Zero-config deployment with automatic builds
+  </Card>
+  <Card title="Netlify" icon="wave">
+    Simple drag-and-drop or Git integration
+  </Card>
+  <Card title="GitHub Pages" icon="github">
+    Free hosting for public repositories
+  </Card>
+  <Card title="AWS S3 + CloudFront" icon="aws">
+    Scalable cloud hosting solution
+  </Card>
+</CardGroup>
+
+### Example: Deploy to Vercel
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel --prod
+```
+
+### Example: Deploy to Netlify
+
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Deploy
+netlify deploy --prod --dir=dist
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Testing" icon="flask" href="/development/testing">
+    Learn about testing strategies
+  </Card>
+  <Card title="Local Setup" icon="laptop-code" href="/development/local-setup">
+    Back to local development setup
+  </Card>
+</CardGroup>

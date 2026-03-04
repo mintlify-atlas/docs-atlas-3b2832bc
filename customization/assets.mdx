@@ -1,0 +1,315 @@
+---
+title: Assets & Images
+description: Learn how to manage logos, images, and favicon setup
+---
+
+## Overview
+
+All static assets (images, logos, icons, favicons) are stored in the `/public` folder. Files in this directory are served at the root path and can be referenced directly in your code.
+
+## Public Folder Structure
+
+The `/public` folder contains the following assets:
+
+```
+public/
+├── Logo-50-años-instituto-Tupac-Amaru.png
+├── chica-señalando-lado-derecho-color.png
+├── fondo-instituto-superior-Tupac-Amaru.png
+├── logo-50-años.png
+├── logo-DEV-WEEK-blanco.png
+├── logo-desarrollo-de-sistemas-de-informacion.png
+├── logo-dev-week-cronograma.png
+├── logo-instituto-Tupac-Amaru.png
+├── logo-nyuro-frame.png
+├── logo-oficial-IESP-tupac-amaru.png
+├── favicon-32x32.png (add if needed)
+├── favicon-16x16.png (add if needed)
+├── apple-touch-icon.png (add if needed)
+├── og-image.jpg (add for social sharing)
+├── manifest.json
+├── robots.txt
+└── sitemap.xml
+```
+
+## Logo Images
+
+### Main Event Logo
+
+The primary DEV WEEK logo is displayed in the hero section:
+
+**File**: `logo-DEV-WEEK-blanco.png`
+
+**Used in**: `src/components/Hero.tsx:86-89`
+
+```tsx
+<img
+  src="/logo-DEV-WEEK-blanco.png"
+  alt="DEV WEEK 2025 - Semana del Desarrollo"
+  className={styles.heroLogo}
+/>
+```
+
+To replace:
+1. Add your new logo to `/public` folder
+2. Update the `src` path in `Hero.tsx`
+3. Update the `alt` text for accessibility
+
+### Anniversary Logo
+
+**File**: `logo-50-años.png`
+
+**Used in**: `src/components/Hero.tsx:80-84`
+
+```tsx
+<img
+  src="/logo-50-años.png"
+  alt="Logo 6 años del Programa de Estudios de Desarrollo de Sistemas de Información"
+  className={styles.logo50}
+/>
+```
+
+This logo appears above the main logo with sparkle animations.
+
+### Institution Logos
+
+Several institutional logos are available:
+
+- `logo-instituto-Tupac-Amaru.png` - Institute logo
+- `logo-oficial-IESP-tupac-amaru.png` - Official IESP logo
+- `Logo-50-años-instituto-Tupac-Amaru.png` - 50th anniversary logo
+- `logo-desarrollo-de-sistemas-de-informacion.png` - Program logo
+
+These can be used in footers, headers, or about sections as needed.
+
+## Background Images
+
+Decorative and background images:
+
+- **`fondo-instituto-superior-Tupac-Amaru.png`**: Institute background image
+- **`chica-señalando-lado-derecho-color.png`**: Decorative illustration
+
+To use a background image in a component:
+
+```tsx
+<div style={{ backgroundImage: "url('/your-background.png')" }}>
+  {/* Content */}
+</div>
+```
+
+Or in a CSS module:
+
+```css
+.heroSection {
+  background-image: url('/your-background.png');
+  background-size: cover;
+  background-position: center;
+}
+```
+
+## Favicon Setup
+
+Favicons are referenced in `index.html:12-14`:
+
+```html
+<!-- Favicons -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+```
+
+### Creating Favicons
+
+1. Create or design your favicon (recommended: 512x512px PNG)
+2. Use a favicon generator tool (e.g., [favicon.io](https://favicon.io), [RealFaviconGenerator](https://realfavicongenerator.net/))
+3. Generate multiple sizes:
+   - `favicon-16x16.png`
+   - `favicon-32x32.png`
+   - `apple-touch-icon.png` (180x180px)
+   - `favicon.ico` (optional, for older browsers)
+4. Place all files in the `/public` folder
+5. Update `index.html` if using different filenames
+
+### Manifest File
+
+The PWA manifest is at `/public/manifest.json` and referenced at `index.html:17`:
+
+```html
+<link rel="manifest" href="/manifest.json" />
+```
+
+Edit `manifest.json` to update app name, colors, and icons:
+
+```json
+{
+  "short_name": "DEV WEEK",
+  "name": "DEV WEEK 2025 - Semana del Desarrollo",
+  "icons": [
+    {
+      "src": "favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "logo-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#61398C",
+  "background_color": "#ffffff"
+}
+```
+
+Make sure to create 192x192 and 512x512 versions of your logo for PWA support.
+
+## Social Media Images
+
+For optimal social media sharing, add an Open Graph image:
+
+**File**: `og-image.jpg` (recommended size: 1200x630px)
+
+**Referenced in**: `index.html:53-54`
+
+```html
+<meta
+  property="og:image"
+  content="https://semanainformatica2025.expandeya.com/og-image.jpg"
+/>
+```
+
+This image appears when your site is shared on Facebook, Twitter, LinkedIn, etc.
+
+### Creating an OG Image
+
+1. Design a 1200x630px image with:
+   - Event logo
+   - Event name and dates
+   - Key information
+   - Brand colors
+2. Save as `og-image.jpg` in `/public`
+3. Update the full URL in `index.html` (lines 54 and 68)
+
+## Adding New Images
+
+### Step 1: Add to Public Folder
+
+```bash
+cp your-new-image.png /public/
+```
+
+### Step 2: Reference in Code
+
+In a React component:
+
+```tsx
+<img 
+  src="/your-new-image.png" 
+  alt="Descriptive alt text"
+  className={styles.yourClass}
+/>
+```
+
+In CSS:
+
+```css
+.background {
+  background-image: url('/your-new-image.png');
+}
+```
+
+### Step 3: Optimize Images
+
+For best performance:
+
+- Use **WebP** format for modern browsers (with PNG/JPG fallback)
+- Compress images (tools: [TinyPNG](https://tinypng.com/), [Squoosh](https://squoosh.app/))
+- Use appropriate dimensions (don't serve 4000px images if you only display 400px)
+- Consider lazy loading for below-the-fold images
+
+## Speaker Placeholder Images
+
+Currently, speakers use a placeholder at `src/components/Speakers.tsx:26`:
+
+```typescript
+image: "/placeholder-speaker.jpg",
+```
+
+To add real speaker photos:
+
+1. Add photos to `/public/speakers/` folder:
+   ```
+   /public/speakers/rodrigo-salazar.jpg
+   /public/speakers/jim-cardenas.jpg
+   ```
+
+2. Update the `image` path in `SPEAKERS_DATA`:
+   ```typescript
+   {
+     id: 1,
+     name: "Tec. Rodrigo Salazar",
+     image: "/speakers/rodrigo-salazar.jpg",
+     // ...
+   }
+   ```
+
+3. Recommended photo specs:
+   - Square aspect ratio (1:1)
+   - At least 400x400px
+   - Professional headshot
+   - Consistent style across all speakers
+
+## robots.txt and sitemap.xml
+
+Two important SEO files are in `/public`:
+
+- **`robots.txt`**: Controls search engine crawling
+- **`sitemap.xml`**: Lists all pages for search engines
+
+Update `robots.txt` with your sitemap URL:
+
+```txt
+User-agent: *
+Allow: /
+
+Sitemap: https://semanainformatica2025.expandeya.com/sitemap.xml
+```
+
+Update `sitemap.xml` with your actual domain and pages:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://semanainformatica2025.expandeya.com/</loc>
+    <lastmod>2025-12-01</lastmod>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+```
+
+## Asset Organization Best Practices
+
+1. **Use subfolders** for organization:
+   ```
+   /public/
+   ├── logos/
+   ├── speakers/
+   ├── backgrounds/
+   └── icons/
+   ```
+
+2. **Use descriptive names**: `event-logo-2025.png` instead of `logo1.png`
+
+3. **Keep originals**: Store high-res originals outside `/public`, only put optimized versions in `/public`
+
+4. **Document usage**: Comment in code where each asset is used
+
+5. **Version control**: Use Git LFS for large images if needed

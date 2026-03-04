@@ -1,0 +1,324 @@
+---
+title: Schedule Component
+description: Interactive event schedule with day cards and detailed activity modal
+---
+
+# Schedule Component
+
+The Schedule component displays the three-day event schedule with interactive cards for each day. Clicking a day opens a modal with detailed activities and timing information.
+
+## Overview
+
+The Schedule component provides:
+- **Day cards** - Visual cards for each event day with theme and basic info
+- **Interactive modal** - Detailed schedule view for selected day
+- **Download option** - Link to download the complete schedule
+- **Animations** - Staggered entrance effects using Intersection Observer
+
+## Props
+
+The Schedule component does not accept any props. It's a self-contained section component.
+
+## File Location
+
+```
+~/workspace/source/src/components/Schedule.tsx
+~/workspace/source/src/components/Schedule.module.css
+```
+
+## Data Source
+
+The component imports schedule data from `../data/schedule`:
+
+```typescript
+import { diasEvento } from "../data/schedule";
+import { Dia, Actividad } from "../types";
+```
+
+### Data Structure
+
+<ParamField path="diasEvento" type="Dia[]">
+  Array of event days, each containing:
+  
+  <ParamField path="id" type="number">
+    Unique identifier for the day
+  </ParamField>
+  
+  <ParamField path="nombre" type="string">
+    Day name (e.g., "Miércoles 10")
+  </ParamField>
+  
+  <ParamField path="tema" type="string">
+    Day theme (e.g., "Inauguración y Gestión de TI")
+  </ParamField>
+  
+  <ParamField path="fecha" type="string">
+    Formatted date (e.g., "10 de diciembre")
+  </ParamField>
+  
+  <ParamField path="hora" type="string">
+    Time range (e.g., "10:50 - 13:00 hrs.")
+  </ParamField>
+  
+  <ParamField path="descripcion" type="string">
+    Detailed description of the day's focus
+  </ParamField>
+  
+  <ParamField path="actividades" type="Actividad[]">
+    Array of activities with `titulo`, `hora`, and optional `subtitulo`
+  </ParamField>
+  
+  <ParamField path="destacado" type="boolean">
+    Whether this day is featured/highlighted
+  </ParamField>
+</ParamField>
+
+## Type Definitions
+
+```typescript
+// From src/types.ts
+export type Actividad = {
+  titulo: string;
+  hora: string;
+  subtitulo?: string;
+};
+
+export type Dia = {
+  id: number;
+  nombre: string;
+  tema: string;
+  fecha: string;
+  hora: string;
+  descripcion: string;
+  actividades: Actividad[];
+  destacado: boolean;
+};
+```
+
+## Key Features
+
+### 1. Day Cards Grid
+
+Displays all event days in a responsive grid:
+
+```tsx
+<div className={styles.grid}>
+  {diasEvento.map((dia) => (
+    <div
+      key={dia.id}
+      onClick={() => setSelectedDay(dia)}
+      className={styles.scheduleCard}
+    >
+      <div className={styles.dayName}>{dia.nombre.toUpperCase()}</div>
+      <h3 className={styles.cardTitle}>{dia.tema}</h3>
+      <div className={styles.cardInfo}>
+        <Calendar className={styles.cardIcon} />
+        <span>{dia.fecha}</span>
+      </div>
+      <div className={styles.cardInfo}>
+        <Clock className={styles.cardIcon} />
+        <span>{dia.hora}</span>
+      </div>
+      <button className={styles.detailsBtn}>
+        Ver detalles
+        <ChevronRight size={16} />
+      </button>
+    </div>
+  ))}
+</div>
+```
+
+### 2. Intersection Observer Animation
+
+Cards animate into view when scrolled into viewport:
+
+```typescript
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const cards = document.querySelectorAll(`.${styles.scheduleCard}`);
+          enterStagger(cards, 100);
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+  if (sectionRef.current) {
+    observer.observe(sectionRef.current);
+  }
+  return () => observer.disconnect();
+}, []);
+```
+
+### 3. Modal with Activity Details
+
+When a day is clicked, a modal displays the full schedule:
+
+```tsx
+{selectedDay && (
+  <div
+    className={styles.modalOverlay}
+    onClick={() => setSelectedDay(null)}
+  >
+    <div
+      className={styles.modalContent}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className={styles.modalHeader}>
+        <div className={styles.dayModal}>
+          {selectedDay.nombre.toUpperCase()}
+        </div>
+        <h3 className={styles.modalTitle}>{selectedDay.tema}</h3>
+        {/* Date and time info */}
+      </div>
+      
+      <div className={styles.modalBody}>
+        <p className={styles.modalDesc}>{selectedDay.descripcion}</p>
+        <h4 className={styles.modalSubtitle}>Actividades</h4>
+        <ul className={styles.modalList}>
+          {selectedDay.actividades.map((actividad, index) => (
+            <li key={index} className={styles.modalListItem}>
+              <div className={styles.modalListNum}>{index + 1}</div>
+              <div className={styles.actividadBox}>
+                {actividad.hora && (
+                  <span className={styles.actividadHora}>
+                    {actividad.hora}
+                  </span>
+                )}
+                <div className={styles.actividadTituloWrapper}>
+                  <span className={styles.actividadTitulo}>
+                    {actividad.titulo}
+                  </span>
+                  {actividad.subtitulo && (
+                    <span className={styles.actividadSubtitulo}>
+                      — {actividad.subtitulo}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+)}
+```
+
+### 4. Body Scroll Lock
+
+Prevents background scrolling when modal is open:
+
+```typescript
+useEffect(() => {
+  if (selectedDay) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "unset";
+  }
+  return () => {
+    document.body.style.overflow = "unset";
+  };
+}, [selectedDay]);
+```
+
+### 5. Download Schedule Option
+
+```tsx
+<div className={styles.downloadRow}>
+  <a
+    href="https://github.com/leonardo007-code/semanainformatica2025/blob/main/public/cronograma-devweek-2025.html"
+    target="_blank"
+    rel="noopener noreferrer"
+    className={styles.downloadBtn}
+  >
+    <Download className={styles.downloadIcon} />
+    Descargar Cronograma Completo
+  </a>
+</div>
+```
+
+<Note>
+The schedule HTML file is located in `public/cronograma-devweek-2025.html` in the source repository. You can host it alongside your application or link to an external version.
+</Note>
+
+## State Management
+
+```typescript
+const [selectedDay, setSelectedDay] = useState<Dia | null>(null);
+```
+
+The component uses local state to track which day's modal is currently open.
+
+## Component Structure
+
+```tsx
+<section ref={sectionRef} id="cronograma" className={styles.section}>
+  <div className={styles.container}>
+    {/* Header with title and description */}
+    <div className={styles.header}>...</div>
+    
+    {/* Grid of day cards */}
+    <div className={styles.grid}>...</div>
+    
+    {/* Download button */}
+    <div className={styles.downloadRow}>...</div>
+  </div>
+  
+  {/* Modal (conditionally rendered) */}
+  {selectedDay && <div className={styles.modalOverlay}>...</div>}
+</section>
+```
+
+## Dependencies
+
+### External Packages
+- `lucide-react` - Calendar, Clock, Download, X, CalendarDays, ChevronRight icons
+- `react` - useState, useEffect, useRef hooks
+
+### Internal Modules
+- `../utils/animations` - enterStagger function
+- `../data/schedule` - diasEvento data array
+- `../types` - Dia and Actividad type definitions
+
+## Usage Example
+
+```tsx
+import Schedule from './components/Schedule';
+
+function App() {
+  return (
+    <main>
+      <Schedule />
+      {/* Other sections */}
+    </main>
+  );
+}
+```
+
+## Styling Features
+
+The `destacado` property applies special styling to featured days:
+
+```tsx
+<div
+  className={`${styles.modalBody} ${
+    selectedDay.destacado ? styles.featuredActivities : ""
+  }`}
+>
+```
+
+## Accessibility
+
+- **Semantic HTML**: Uses proper heading hierarchy (h2, h3, h4)
+- **Section ID**: `id="cronograma"` for anchor navigation
+- **Modal close**: Clicking overlay or X button closes modal
+- **Keyboard support**: ESC key closes modal (implementation can be added)
+
+## Related Files
+
+- `src/data/schedule.ts` - Schedule data source (Lines 1-128)
+- `src/types.ts` - Type definitions for Dia and Actividad
+- `Schedule.module.css` - Component styles

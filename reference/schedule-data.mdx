@@ -1,0 +1,168 @@
+---
+title: "Schedule Data Structure"
+description: "Reference documentation for the diasEvento array and schedule data structure in DEV WEEK 2025"
+---
+
+## Overview
+
+The schedule data for DEV WEEK 2025 is stored in `src/data/schedule.ts` and exported as the `diasEvento` array. This array contains detailed information about each day of the event, including activities, times, and descriptions.
+
+## Data Location
+
+**File**: `src/data/schedule.ts`
+
+**Export**: `diasEvento`
+
+## Type Definitions
+
+The schedule data uses TypeScript types defined in `src/types.ts`:
+
+### Dia Interface
+
+```typescript
+export type Dia = {
+  id: number;
+  nombre: string;
+  tema: string;
+  fecha: string;
+  hora: string;
+  descripcion: string;
+  actividades: Actividad[];
+  destacado: boolean;
+};
+```
+
+### Actividad Interface
+
+```typescript
+export type Actividad = {
+  titulo: string;
+  hora: string;
+  subtitulo?: string; // Optional field
+};
+```
+
+## Field Descriptions
+
+### Dia Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `number` | Unique identifier for the day (1, 2, 3) |
+| `nombre` | `string` | Display name of the day (e.g., "Miércoles 10") |
+| `tema` | `string` | Main theme for the day |
+| `fecha` | `string` | Date in human-readable format (e.g., "10 de diciembre") |
+| `hora` | `string` | Time range for the day's events (e.g., "10:50 - 13:00 hrs.") |
+| `descripcion` | `string` | Brief description of the day's activities |
+| `actividades` | `Actividad[]` | Array of activities scheduled for the day |
+| `destacado` | `boolean` | Whether this day is featured/highlighted |
+
+### Actividad Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `titulo` | `string` | Yes | Title of the activity |
+| `hora` | `string` | Yes | Time slot for the activity (e.g., "11:00 – 12:00") |
+| `subtitulo` | `string` | No | Additional context or speaker information |
+
+## Data Structure Example
+
+Here's a complete example from the actual codebase:
+
+```typescript
+export const diasEvento = [
+  {
+    id: 1,
+    nombre: "Miércoles 10",
+    tema: "Inauguración y Gestión de TI",
+    fecha: "10 de diciembre",
+    hora: "10:50 - 13:00 hrs.",
+    descripcion:
+      "Inicio oficial de la DEV WEEK 2025 con palabras de bienvenida, presentación del 4º semestre y ponencia sobre Gestión de TI.",
+    actividades: [
+      {
+        titulo: "Recepción y registro de asistencia",
+        hora: "10:50 – 11:00",
+      },
+      {
+        titulo: "Ceremonia de apertura",
+        subtitulo: "Himno Nacional del Perú e Himno al Cusco",
+        hora: "11:10 – 11:21",
+      },
+      {
+        titulo: "Palabras de bienvenida",
+        subtitulo: "Coordinador del Programa de Estudios",
+        hora: "11:21 – 11:30",
+      },
+      {
+        titulo: "Presentación y ponencia académica",
+        subtitulo:
+          "Estudiantes del 4º Semestre — Desarrollo de Sistemas de Información",
+        hora: "11:30 – 12:10",
+      },
+      {
+        titulo: "Ponencia: Gestión de TI",
+        subtitulo: "Tec. Rodrigo Salazar — Especialista en Gestión de TI",
+        hora: "12:10 – 12:50",
+      },
+      {
+        titulo: "Actividad interactiva y sorteo de premios",
+        hora: "12:50 – 13:00",
+      },
+    ],
+    destacado: false,
+  },
+  // ... more days
+];
+```
+
+## Event Days Overview
+
+DEV WEEK 2025 spans three days:
+
+### Day 1 - Miércoles 10 de Diciembre
+- **Theme**: Inauguración y Gestión de TI
+- **Time**: 10:50 - 13:00 hrs.
+- **Highlighted**: No
+- **Activities**: 6 activities including opening ceremony and IT Management talk
+
+### Day 2 - Jueves 11 de Diciembre
+- **Theme**: Bootcamp - Ciberseguridad (Día 1)
+- **Time**: 11:00 - 16:00 hrs.
+- **Highlighted**: Yes
+- **Activities**: 6 activities focused on cybersecurity fundamentals
+
+### Day 3 - Viernes 12 de Diciembre
+- **Theme**: Bootcamp - Ciberseguridad (Día 2)
+- **Time**: 11:00 - 16:00 hrs.
+- **Highlighted**: Yes
+- **Activities**: 6 activities including closing ceremony and certificate distribution
+
+## Usage Example
+
+To access schedule data in your components:
+
+```typescript
+import { diasEvento } from '../data/schedule';
+import type { Dia, Actividad } from '../types';
+
+// Get all event days
+const allDays: Dia[] = diasEvento;
+
+// Get a specific day
+const firstDay = diasEvento.find(dia => dia.id === 1);
+
+// Get highlighted days
+const highlightedDays = diasEvento.filter(dia => dia.destacado);
+
+// Access activities for a specific day
+const activities: Actividad[] = diasEvento[0].actividades;
+```
+
+## Notes
+
+- The `subtitulo` field in activities is optional and typically contains speaker information or additional context
+- Time formats use em dashes (–) rather than hyphens (-) in the original data
+- The `destacado` field is used to highlight special days (Bootcamp days) in the UI
+- All times are in 24-hour format with "hrs." suffix
+- Dates are in Spanish format

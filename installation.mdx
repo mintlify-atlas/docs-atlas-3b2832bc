@@ -1,0 +1,356 @@
+---
+title: Installation
+description: Detailed installation instructions, prerequisites, dependency information, and troubleshooting for the DEV WEEK 2025 project.
+---
+
+## Prerequisites
+
+Before installing the DEV WEEK 2025 project, ensure you have the following:
+
+### Node.js and npm
+
+You need Node.js and npm installed on your system.
+
+<Note>
+  The project uses Vite 5.4.2 which requires **Node.js version 18.0.0 or higher**. We recommend using the latest LTS version of Node.js.
+</Note>
+
+**Check your Node.js version:**
+
+```bash
+node --version
+# Should output v18.0.0 or higher
+
+npm --version
+# Should output v9.0.0 or higher
+```
+
+**Don't have Node.js?** Download it from [nodejs.org](https://nodejs.org/) or use a version manager:
+
+<CodeGroup>
+
+```bash Using nvm (Linux/macOS)
+# Install nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+# Install and use Node.js LTS
+nvm install --lts
+nvm use --lts
+```
+
+```bash Using fnm (Cross-platform)
+# Install fnm
+curl -fsSL https://fnm.vercel.app/install | bash
+
+# Install and use Node.js LTS
+fnm install --lts
+fnm use --lts
+```
+
+</CodeGroup>
+
+### Git
+
+Git is required to clone the repository:
+
+```bash
+git --version
+# Should output git version 2.x.x or higher
+```
+
+### Code editor
+
+We recommend **Visual Studio Code** with these extensions:
+
+- ESLint
+- TypeScript and JavaScript Language Features
+- Tailwind CSS IntelliSense
+- Prettier (optional)
+
+## Installation steps
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the project to your local machine:
+
+    ```bash
+    git clone <repository-url>
+    cd vite-react-typescript-starter
+    ```
+
+    Replace `<repository-url>` with the actual Git URL.
+  </Step>
+
+  <Step title="Install dependencies">
+    Install all npm packages:
+
+    ```bash
+    npm install
+    ```
+
+    This installs all dependencies from `package.json`.
+  </Step>
+
+  <Step title="Verify installation">
+    Check that dependencies installed correctly:
+
+    ```bash
+    npm list --depth=0
+    ```
+
+    You should see the main dependencies listed without errors.
+  </Step>
+
+  <Step title="Start development server">
+    Run the development server:
+
+    ```bash
+    npm run dev
+    ```
+
+    Open your browser to the URL shown (typically `http://localhost:5173/`).
+  </Step>
+</Steps>
+
+## Dependencies explained
+
+The project uses these key dependencies from `package.json`:
+
+### Production dependencies
+
+<CodeGroup>
+
+```json package.json
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "animejs": "^3.2.1",
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
+```
+
+</CodeGroup>
+
+| Package | Version | Purpose |
+|---------|---------|----------|
+| `react` | 18.3.1 | Core React library |
+| `react-dom` | 18.3.1 | React DOM rendering |
+| `@supabase/supabase-js` | 2.57.4 | Supabase client for backend integration |
+| `animejs` | 3.2.1 | JavaScript animation library |
+| `lucide-react` | 0.344.0 | Icon library components |
+
+### Development dependencies
+
+Key dev dependencies:
+
+| Package | Version | Purpose |
+|---------|---------|----------|
+| `vite` | 5.4.2 | Build tool and dev server |
+| `typescript` | 5.5.3 | TypeScript compiler |
+| `tailwindcss` | 3.4.1 | Utility-first CSS framework |
+| `eslint` | 9.9.1 | JavaScript/TypeScript linting |
+| `@vitejs/plugin-react` | 4.3.1 | Vite React plugin with Fast Refresh |
+| `autoprefixer` | 10.4.18 | CSS vendor prefix automation |
+| `postcss` | 8.4.35 | CSS transformation tool |
+
+## Project scripts
+
+From `package.json`, these scripts are available:
+
+<CodeGroup>
+
+```json package.json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  }
+}
+```
+
+</CodeGroup>
+
+### Script usage
+
+**Development:**
+```bash
+npm run dev
+```
+Starts Vite dev server with hot module replacement on `http://localhost:5173/`.
+
+**Build:**
+```bash
+npm run build
+```
+Creates optimized production build in `dist/` directory.
+
+**Preview:**
+```bash
+npm run preview
+```
+Serves the production build locally for testing.
+
+**Type checking:**
+```bash
+npm run typecheck
+```
+Runs TypeScript compiler to check for type errors without emitting files.
+
+**Linting:**
+```bash
+npm run lint
+```
+Runs ESLint to check code quality and style issues.
+
+## Configuration files
+
+The project includes these configuration files:
+
+- `vite.config.ts` - Vite build configuration
+- `tsconfig.json` - Base TypeScript configuration
+- `tsconfig.app.json` - App-specific TypeScript settings
+- `tsconfig.node.json` - Node.js TypeScript settings
+- `tailwind.config.js` - Tailwind CSS customization
+- `postcss.config.js` - PostCSS plugins
+- `eslint.config.js` - ESLint rules and plugins
+
+## Troubleshooting
+
+### Port already in use
+
+**Problem:** Port 5173 is already occupied.
+
+**Solution:** Vite will automatically use the next available port. Check the terminal output for the actual URL.
+
+Or specify a different port:
+```bash
+npm run dev -- --port 3000
+```
+
+### Module not found errors
+
+**Problem:** Import errors or "Cannot find module" messages.
+
+**Solution:** Delete `node_modules` and reinstall:
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### TypeScript errors
+
+**Problem:** Type errors in the IDE or when running `typecheck`.
+
+**Solution:** Ensure you're using TypeScript 5.5.3 or higher:
+```bash
+npm list typescript
+```
+
+Restart your TypeScript server in VS Code:
+1. Open Command Palette (Cmd/Ctrl + Shift + P)
+2. Type "TypeScript: Restart TS Server"
+3. Press Enter
+
+### Animations not working
+
+**Problem:** anime.js animations don't play.
+
+**Solution:** Check browser console for errors. Ensure `src/utils/animations.js` exists:
+
+```bash
+ls -la src/utils/animations.js
+```
+
+The animations respect `prefers-reduced-motion`. If you have this setting enabled in your OS, animations will be reduced or disabled.
+
+### Build fails
+
+**Problem:** `npm run build` fails with errors.
+
+**Solution:**
+
+1. Run type checking first:
+   ```bash
+   npm run typecheck
+   ```
+
+2. Fix any type errors reported.
+
+3. Run ESLint to check for code issues:
+   ```bash
+   npm run lint
+   ```
+
+4. Try building again:
+   ```bash
+   npm run build
+   ```
+
+### Slow performance
+
+**Problem:** Development server is slow or unresponsive.
+
+**Solution:**
+
+1. Ensure you're using Node.js 18 or higher
+2. Clear Vite cache:
+   ```bash
+   rm -rf node_modules/.vite
+   npm run dev
+   ```
+
+3. Close unused browser tabs and applications
+4. Check system resources (CPU/RAM usage)
+
+## Environment setup
+
+### Optional: Supabase configuration
+
+If you're using Supabase features, create a `.env` file:
+
+```bash .env
+VITE_SUPABASE_URL=your-project-url
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+<Warning>
+  Never commit `.env` files to version control. Add `.env` to `.gitignore`.
+</Warning>
+
+### IDE configuration
+
+For the best development experience in VS Code, create `.vscode/settings.json`:
+
+```json .vscode/settings.json
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ]
+}
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Quick guide to get the project running
+  </Card>
+  <Card title="Project Structure" icon="folder-tree">
+    Learn about the codebase organization
+  </Card>
+</CardGroup>
+
+<Tip>
+  Join the development discussion or report issues with the project organizers at IESP Túpac Amaru.
+</Tip>

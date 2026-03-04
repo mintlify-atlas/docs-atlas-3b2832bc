@@ -1,0 +1,696 @@
+---
+title: Deployment
+description: Build process and deployment guide for DEV WEEK 2025 site
+---
+
+# Deployment
+
+This guide covers building, optimizing, and deploying the DEV WEEK 2025 site to production.
+
+## Build Process
+
+### Build Command
+
+```bash
+npm run build
+```
+
+**Script from package.json:**
+```json
+// package.json:8
+"build": "vite build"
+```
+
+### Build Output
+
+Vite builds the project and outputs to the `dist/` directory:
+
+```
+dist/
+├── index.html
+├── assets/
+│   ├── index-[hash].js       # Main bundle
+│   ├── index-[hash].css      # Compiled styles
+│   ├── vendor-[hash].js      # Third-party dependencies
+│   └── [component]-[hash].js # Lazy-loaded chunks
+├── favicon-32x32.png
+├── favicon-16x16.png
+├── apple-touch-icon.png
+├── manifest.json
+├── robots.txt
+└── sitemap.xml
+```
+
+**Content-based hashing** ensures efficient browser caching and cache busting.
+
+---
+
+## Vite Configuration
+
+**Current Configuration:**
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+  },
+});
+```
+
+### Production Optimizations
+
+For production, consider adding these configurations:
+
+```typescript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  
+  build: {
+    // Output directory
+    outDir: 'dist',
+    
+    // Generate sourcemaps for debugging
+    sourcemap: false, // Set true for staging
+    
+    // Chunk size warnings
+    chunkSizeWarningLimit: 1000,
+    
+    // Rollup options
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom'],
+          'animations': ['animejs'],
+          'icons': ['lucide-react']
+        }
+      }
+    },
+    
+    // Minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.logs
+        drop_debugger: true
+      }
+    }
+  },
+  
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+  },
+  
+  // Preview server config
+  preview: {
+    port: 4173,
+    strictPort: true
+  }
+});
+```
+
+---
+
+## Development Scripts
+
+**Available npm scripts:**
+```json
+// package.json:6-11
+"scripts": {
+  "dev": "vite",              // Start dev server (port 5173)
+  "build": "vite build",      // Production build
+  "lint": "eslint .",         // Run ESLint
+  "preview": "vite preview",  // Preview production build locally
+  "typecheck": "tsc --noEmit -p tsconfig.app.json" // Type checking
+}
+```
+
+### Pre-deployment Checklist
+
+```bash
+# 1. Type check
+npm run typecheck
+
+# 2. Lint code
+npm run lint
+
+# 3. Build for production
+npm run build
+
+# 4. Preview build locally
+npm run preview
+```
+
+---
+
+## Recommended Hosting Platforms
+
+### Vercel (Recommended)
+
+**Advantages:**
+- Zero-config deployment for Vite projects
+- Automatic HTTPS
+- Global CDN
+- Preview deployments for pull requests
+- Edge functions support
+- Excellent performance
+
+**Deployment Steps:**
+
+1. **Install Vercel CLI:**
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Deploy:**
+   ```bash
+   vercel
+   ```
+
+3. **Production deployment:**
+   ```bash
+   vercel --prod
+   ```
+
+**Configuration file (vercel.json):**
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
+}
+```
+
+---
+
+### Netlify
+
+**Advantages:**
+- Easy drag-and-drop deployment
+- Automatic HTTPS
+- Form handling
+- Serverless functions
+- Split testing
+
+**Deployment Steps:**
+
+1. **Install Netlify CLI:**
+   ```bash
+   npm i -g netlify-cli
+   ```
+
+2. **Deploy:**
+   ```bash
+   netlify deploy
+   ```
+
+3. **Production deployment:**
+   ```bash
+   netlify deploy --prod
+   ```
+
+**Configuration file (netlify.toml):**
+```toml
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+```
+
+---
+
+### Cloudflare Pages
+
+**Advantages:**
+- Excellent global CDN
+- Unlimited bandwidth
+- DDoS protection
+- Workers for edge computing
+
+**Build Settings:**
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Node version: `18`
+
+---
+
+### GitHub Pages
+
+**Advantages:**
+- Free for public repositories
+- Simple workflow
+- Good for static sites
+
+**GitHub Actions Workflow (.github/workflows/deploy.yml):**
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+      
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+```
+
+**Base path configuration for GitHub Pages:**
+```typescript
+// vite.config.ts
+export default defineConfig({
+  base: '/repo-name/', // Replace with your repo name
+  // ... other config
+});
+```
+
+---
+
+## Environment Variables
+
+### Setup
+
+Create `.env` files for different environments:
+
+**.env.development:**
+```bash
+VITE_API_URL=http://localhost:3000
+VITE_SUPABASE_URL=your_dev_url
+VITE_SUPABASE_ANON_KEY=your_dev_key
+```
+
+**.env.production:**
+```bash
+VITE_API_URL=https://api.production.com
+VITE_SUPABASE_URL=your_prod_url
+VITE_SUPABASE_ANON_KEY=your_prod_key
+```
+
+### Usage
+
+```typescript
+// Accessing environment variables
+const apiUrl = import.meta.env.VITE_API_URL;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+```
+
+**Important:**
+- Only variables prefixed with `VITE_` are exposed to client
+- Never commit `.env` files with sensitive data
+- Use platform-specific environment variable settings in production
+
+### Platform Configuration
+
+**Vercel:**
+- Settings → Environment Variables
+- Add variables per environment (Production, Preview, Development)
+
+**Netlify:**
+- Site settings → Build & deploy → Environment
+- Add variables with optional scopes
+
+**Cloudflare Pages:**
+- Settings → Environment variables
+- Separate Production and Preview variables
+
+---
+
+## Performance Optimization
+
+### Code Splitting
+
+**Already implemented:**
+```tsx
+// src/App.tsx:5-10
+const About = lazy(() => import("./components/About"));
+const Schedule = lazy(() => import("./components/Schedule"));
+const Speakers = lazy(() => import("./components/Speakers"));
+const LiveStreams = lazy(() => import("./components/LiveStreams"));
+const Sponsors = lazy(() => import("./components/Sponsors"));
+```
+
+**Suspense boundaries:**
+```tsx
+// src/App.tsx:24-26
+<Suspense fallback={<div style={{ minHeight: "200px" }} />}>
+  <About />
+</Suspense>
+```
+
+**Benefits:**
+- Reduces initial bundle size
+- Faster time to interactive
+- Components load on-demand
+
+### Font Optimization
+
+**Already implemented:**
+```html
+<!-- index.html:6-9 -->
+<!-- Performance: DNS prefetch and preconnect for faster font loading -->
+<link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+```
+
+**Font loading:**
+```css
+/* src/index.css:1 */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap");
+```
+
+### Image Optimization
+
+**Recommendations:**
+
+1. **Use WebP format:**
+   ```bash
+   # Convert images to WebP
+   cwebp input.png -q 80 -o output.webp
+   ```
+
+2. **Responsive images:**
+   ```tsx
+   <picture>
+     <source srcset="/image.webp" type="image/webp" />
+     <source srcset="/image.jpg" type="image/jpeg" />
+     <img src="/image.jpg" alt="Description" />
+   </picture>
+   ```
+
+3. **Lazy loading:**
+   ```tsx
+   <img src="/image.jpg" loading="lazy" alt="Description" />
+   ```
+
+### Bundle Analysis
+
+**Install analyzer:**
+```bash
+npm install --save-dev rollup-plugin-visualizer
+```
+
+**Update vite.config.ts:**
+```typescript
+import { visualizer } from 'rollup-plugin-visualizer';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    visualizer({
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    })
+  ],
+});
+```
+
+**Run build:**
+```bash
+npm run build
+# Opens stats.html showing bundle composition
+```
+
+---
+
+## Compression
+
+### Gzip & Brotli
+
+Most hosting platforms automatically enable compression. To verify:
+
+**Vercel:** Automatic gzip & brotli  
+**Netlify:** Automatic gzip & brotli  
+**Cloudflare:** Automatic gzip & brotli
+
+### Manual Configuration (Nginx)
+
+```nginx
+# Enable gzip
+gzip on;
+gzip_vary on;
+gzip_min_length 1024;
+gzip_comp_level 6;
+gzip_types
+  text/plain
+  text/css
+  text/javascript
+  application/javascript
+  application/json
+  application/x-javascript
+  text/xml
+  application/xml
+  application/xml+rss;
+
+# Enable brotli (if module installed)
+brotli on;
+brotli_comp_level 6;
+brotli_types
+  text/plain
+  text/css
+  text/javascript
+  application/javascript
+  application/json
+  text/xml
+  application/xml;
+```
+
+---
+
+## Caching Strategy
+
+### Recommended Headers
+
+**Static assets (with hash):**
+```
+Cache-Control: public, max-age=31536000, immutable
+```
+
+**HTML:**
+```
+Cache-Control: public, max-age=0, must-revalidate
+```
+
+**Images:**
+```
+Cache-Control: public, max-age=2592000
+```
+
+---
+
+## Domain Configuration
+
+### Custom Domain Setup
+
+**Current domain:** `semanainformatica2025.expandeya.com`
+
+**Vercel:**
+1. Go to Project Settings → Domains
+2. Add your domain
+3. Configure DNS:
+   ```
+   Type: CNAME
+   Name: semanainformatica2025
+   Value: cname.vercel-dns.com
+   ```
+
+**Netlify:**
+1. Site settings → Domain management
+2. Add custom domain
+3. Configure DNS:
+   ```
+   Type: CNAME
+   Name: semanainformatica2025
+   Value: [your-site].netlify.app
+   ```
+
+---
+
+## SSL/HTTPS
+
+All recommended platforms provide automatic HTTPS:
+
+- **Vercel:** Automatic SSL via Let's Encrypt
+- **Netlify:** Automatic SSL via Let's Encrypt
+- **Cloudflare:** Automatic SSL with Full (strict) mode
+- **GitHub Pages:** Automatic SSL for custom domains
+
+**Force HTTPS redirect** is enabled by default on all platforms.
+
+---
+
+## Monitoring & Analytics
+
+### Performance Monitoring
+
+**Recommendations:**
+- Google PageSpeed Insights
+- Lighthouse CI
+- Web Vitals tracking
+- Vercel Analytics (if using Vercel)
+
+**Web Vitals implementation:**
+```typescript
+// src/main.tsx
+import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+
+function sendToAnalytics(metric: any) {
+  // Send to your analytics endpoint
+  console.log(metric);
+}
+
+getCLS(sendToAnalytics);
+getFID(sendToAnalytics);
+getFCP(sendToAnalytics);
+getLCP(sendToAnalytics);
+getTTFB(sendToAnalytics);
+```
+
+---
+
+## Deployment Checklist
+
+- [ ] Run `npm run typecheck`
+- [ ] Run `npm run lint`
+- [ ] Test production build locally with `npm run preview`
+- [ ] Verify all environment variables are set
+- [ ] Check robots.txt and sitemap.xml are in `/public`
+- [ ] Verify meta tags and Open Graph images
+- [ ] Test responsive design on multiple devices
+- [ ] Test accessibility with screen reader
+- [ ] Check reduced motion support
+- [ ] Verify all images have alt text
+- [ ] Test all links (internal and external)
+- [ ] Check console for errors/warnings
+- [ ] Test lazy-loaded components
+- [ ] Verify PWA manifest
+- [ ] Test on multiple browsers (Chrome, Firefox, Safari)
+- [ ] Run Lighthouse audit
+- [ ] Configure custom domain and SSL
+- [ ] Set up analytics
+- [ ] Configure cache headers
+- [ ] Enable compression
+
+---
+
+## Troubleshooting
+
+### Build Fails
+
+**TypeScript errors:**
+```bash
+npm run typecheck
+# Fix reported errors
+```
+
+**Dependency issues:**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+```
+
+### 404 on Refresh
+
+Single-page apps need redirect rules (see platform configs above).
+
+### Large Bundle Size
+
+```bash
+npm run build
+# Check dist/assets/ folder sizes
+# Use bundle analyzer to identify large dependencies
+```
+
+### Slow Performance
+
+1. Check Lighthouse scores
+2. Analyze bundle with visualizer
+3. Verify lazy loading is working
+4. Check for console errors
+5. Test network throttling in DevTools
+
+---
+
+## Resources
+
+- [Vite Deployment Guide](https://vitejs.dev/guide/static-deploy.html)
+- [Vercel Documentation](https://vercel.com/docs)
+- [Netlify Documentation](https://docs.netlify.com/)
+- [Web Vitals](https://web.dev/vitals/)
+- [Lighthouse](https://developer.chrome.com/docs/lighthouse/)

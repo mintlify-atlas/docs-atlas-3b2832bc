@@ -1,0 +1,335 @@
+---
+title: Speakers Component
+description: Filterable speaker directory with search and day filtering
+---
+
+# Speakers Component
+
+The Speakers component displays all event speakers with filtering capabilities by day and search term. Each speaker card shows their information, topic, and schedule.
+
+## Overview
+
+The Speakers component provides:
+- **Speaker cards** - Grid display of all speakers with bio and details
+- **Search functionality** - Real-time search by name, topic, or role
+- **Day filters** - Filter speakers by event day
+- **Animations** - Fade-in and hover lift effects
+
+## Props
+
+The Speakers component does not accept any props. It's a self-contained section component.
+
+## File Location
+
+```
+~/workspace/source/src/components/Speakers.tsx
+~/workspace/source/src/components/Speakers.module.css
+```
+
+## Data Source
+
+The component defines speaker data internally:
+
+```typescript
+const SPEAKERS_DATA: Speaker[] = [
+  {
+    id: 1,
+    name: "Tec. Rodrigo Salazar",
+    role: "Especialista en Gestión de TI",
+    bio: "Especialista en gestión de tecnologías...",
+    topic: "Gestión de TI",
+    day: "Miércoles 10",
+    time: "12:10 - 12:50",
+    image: "/placeholder-speaker.jpg",
+  },
+  // ... more speakers
+];
+```
+
+### Speaker Interface
+
+```typescript
+interface Speaker {
+  id: number;
+  name: string;
+  role: string;
+  bio: string;
+  topic: string;
+  day: string;
+  time: string;
+  image: string;
+}
+```
+
+<ParamField path="Speaker" type="interface">
+  Speaker data structure
+  
+  <ParamField path="id" type="number" required>
+    Unique identifier for the speaker
+  </ParamField>
+  
+  <ParamField path="name" type="string" required>
+    Full name of the speaker
+  </ParamField>
+  
+  <ParamField path="role" type="string" required>
+    Professional title or affiliation (e.g., "OWASP Cusco - Ciberseguridad")
+  </ParamField>
+  
+  <ParamField path="bio" type="string" required>
+    Speaker biography and expertise description
+  </ParamField>
+  
+  <ParamField path="topic" type="string" required>
+    Topic or session they're presenting (e.g., "Bootcamp - Ciberseguridad")
+  </ParamField>
+  
+  <ParamField path="day" type="string" required>
+    Day of presentation (e.g., "Miércoles 10", "Jueves 11", "Viernes 12")
+  </ParamField>
+  
+  <ParamField path="time" type="string" required>
+    Time slot (e.g., "12:10 - 12:50")
+  </ParamField>
+  
+  <ParamField path="image" type="string" required>
+    Path to speaker image (currently uses placeholder)
+  </ParamField>
+</ParamField>
+
+## Current Speakers Data
+
+The component includes 6 speakers:
+1. **Tec. Rodrigo Salazar** - Gestión de TI specialist (Wednesday)
+2. **Alejandro Miguel Choqueluque García** - OWASP Cusco, Cybersecurity (Thursday)
+3. **Everth Juvenal Gallegos Puma** - OWASP Cusco, Cybersecurity (Thursday)
+4. **Jim Cardenas Cruz** - OWASP Cusco, Cybersecurity (Friday)
+5. **Dante Srtdhara Quiliche Recharte** - 4th Semester DSI Student (Wednesday)
+6. **Moises Rimachi Cusi** - 4th Semester DSI Student (Wednesday)
+
+## Key Features
+
+### 1. Search Functionality
+
+Real-time search filters speakers by name, topic, or role:
+
+```tsx
+<div className={styles.searchBox}>
+  <Search className={styles.searchIcon} size={20} />
+  <input
+    type="text"
+    placeholder="Buscar por nombre, tema o rol..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className={styles.searchInput}
+    aria-label="Buscar ponentes"
+  />
+</div>
+```
+
+Search implementation:
+
+```typescript
+const filteredSpeakers = SPEAKERS_DATA.filter((speaker) => {
+  const matchesDay = selectedDay === "Todos" || speaker.day === selectedDay;
+  const matchesSearch =
+    speaker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    speaker.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    speaker.role.toLowerCase().includes(searchTerm.toLowerCase());
+  return matchesDay && matchesSearch;
+});
+```
+
+### 2. Day Filters
+
+Filter speakers by event day:
+
+```tsx
+const DAYS = ["Todos", "Miércoles 10", "Jueves 11", "Viernes 12"];
+
+<div className={styles.filters}>
+  {DAYS.map((day) => (
+    <button
+      key={day}
+      onClick={() => setSelectedDay(day)}
+      className={`${styles.filterBtn} ${
+        selectedDay === day ? styles.active : ""
+      }`}
+      aria-pressed={selectedDay === day}
+    >
+      {day}
+    </button>
+  ))}
+</div>
+```
+
+### 3. Speaker Cards
+
+Each speaker is displayed in a card with all details:
+
+```tsx
+<div key={speaker.id} className={styles.speakerCard}>
+  <div className={styles.imageContainer}>
+    <div className={styles.imagePlaceholder}>
+      {speaker.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")}
+    </div>
+  </div>
+  <div className={styles.content}>
+    <h3 className={styles.name}>{speaker.name}</h3>
+    <p className={styles.role}>{speaker.role}</p>
+    <p className={styles.bio}>{speaker.bio}</p>
+    <div className={styles.topic}>
+      <span className={styles.topicLabel}>Tema:</span>
+      <span className={styles.topicName}>{speaker.topic}</span>
+    </div>
+    <div className={styles.schedule}>
+      <Calendar size={16} />
+      <span>
+        {speaker.day} - {speaker.time}
+      </span>
+    </div>
+  </div>
+</div>
+```
+
+**Image Placeholder**: Since speaker images use placeholders, the component generates initials from the speaker's name as a fallback.
+
+### 4. No Results Message
+
+```tsx
+{filteredSpeakers.length === 0 && (
+  <div className={styles.noResults}>
+    <p>No se encontraron ponentes con los criterios seleccionados</p>
+  </div>
+)}
+```
+
+### 5. Animations
+
+```typescript
+useEffect(() => {
+  if (sectionRef.current) {
+    fadeInUp(sectionRef.current, 1000);
+  }
+
+  const timer = setTimeout(() => {
+    batchHoverLift(`.${styles.speakerCard}`);
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, []);
+```
+
+- **fadeInUp**: Section fades in from bottom on mount
+- **batchHoverLift**: Speaker cards get hover lift effect
+
+## State Management
+
+```typescript
+const [selectedDay, setSelectedDay] = useState("Todos");
+const [searchTerm, setSearchTerm] = useState("");
+```
+
+Local state manages filter selections and search input.
+
+## Component Structure
+
+```tsx
+<section ref={sectionRef} className={styles.section} id="ponentes">
+  <div className={styles.container}>
+    {/* Header */}
+    <div className={styles.header}>...</div>
+    
+    {/* Controls: Search and Day Filters */}
+    <div className={styles.controls}>
+      <div className={styles.searchBox}>...</div>
+      <div className={styles.filters}>...</div>
+    </div>
+    
+    {/* Speaker Cards Grid */}
+    <div className={styles.grid}>
+      {filteredSpeakers.map((speaker) => (
+        <div className={styles.speakerCard}>...</div>
+      ))}
+    </div>
+    
+    {/* No Results Message */}
+    {filteredSpeakers.length === 0 && <div className={styles.noResults}>...</div>}
+  </div>
+</section>
+```
+
+## Dependencies
+
+### External Packages
+- `lucide-react` - Search, Calendar, Users icons
+- `react` - useState, useEffect, useRef hooks
+
+### Internal Utilities
+- `../utils/animations` - fadeInUp, batchHoverLift functions
+
+## Usage Example
+
+```tsx
+import Speakers from './components/Speakers';
+
+function App() {
+  return (
+    <main>
+      <Speakers />
+      {/* Other sections */}
+    </main>
+  );
+}
+```
+
+## Customization
+
+### Adding New Speakers
+
+Add new speaker objects to the `SPEAKERS_DATA` array:
+
+```typescript
+const SPEAKERS_DATA: Speaker[] = [
+  // ... existing speakers
+  {
+    id: 7,
+    name: "New Speaker Name",
+    role: "Professional Title",
+    bio: "Biography and expertise...",
+    topic: "Presentation Topic",
+    day: "Miércoles 10",
+    time: "14:00 - 15:00",
+    image: "/path-to-image.jpg",
+  },
+];
+```
+
+### Updating Day Filters
+
+Modify the `DAYS` constant to match your event schedule:
+
+```typescript
+const DAYS = ["Todos", "Day 1", "Day 2", "Day 3"];
+```
+
+## Accessibility
+
+- **Section ID**: `id="ponentes"` for anchor navigation
+- **ARIA labels**: Search input has descriptive `aria-label`
+- **ARIA pressed**: Filter buttons use `aria-pressed` for state
+- **Semantic HTML**: Proper heading hierarchy and list structure
+
+## Performance Considerations
+
+- **Filtered rendering**: Only renders speakers matching current filters
+- **Memoization opportunity**: Consider using `useMemo` for `filteredSpeakers` if the data set grows large
+- **Lazy loading**: Images could be lazy-loaded for better performance
+
+## Related Components
+
+- [Schedule](/components/schedule) - Links to speaker presentation times
+- [Hero](/components/hero) - "Conocer Ponentes" button navigates here

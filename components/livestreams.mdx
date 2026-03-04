@@ -1,0 +1,423 @@
+---
+title: LiveStreams Component
+description: Live stream viewer with status tracking, countdown timers, and video embeds
+---
+
+# LiveStreams Component
+
+The LiveStreams component displays live and recorded event streams with real-time status tracking, countdown timers, and embedded video players. It supports multiple streaming platforms and automatically updates stream status based on date/time.
+
+## Overview
+
+The LiveStreams component provides:
+- **Stream cards** - Visual cards for each livestream with status badges
+- **Status tracking** - Automatically determines if stream is upcoming, live, or recorded
+- **Countdown timers** - Live countdown for upcoming streams
+- **Modal viewer** - Full-screen modal with embedded video player
+- **Platform support** - YouTube, Facebook, Twitch, and custom embeds
+
+## Props
+
+The LiveStreams component does not accept any props. It's a self-contained section component.
+
+## File Location
+
+```
+~/workspace/source/src/components/LiveStreams.tsx
+~/workspace/source/src/components/LiveStreams.module.css
+```
+
+## Data Source
+
+The component defines stream data internally:
+
+```typescript
+const STREAMS: Stream[] = [
+  {
+    id: 1,
+    title: "Inauguración y Gestión de TI",
+    day: "Miércoles 10",
+    date: "2025-12-10",
+    startTime: "11:00",
+    endTime: "13:00",
+    platform: "facebook",
+    embedUrl: "",
+    description: "Inicio oficial de la DEV WEEK 2025...",
+  },
+  // ... more streams
+];
+```
+
+## Type Definitions
+
+```typescript
+// From src/types/stream.ts
+export type StreamStatus = "live" | "upcoming" | "recorded" | "scheduled";
+export type Platform = "youtube" | "twitch" | "facebook" | "other";
+
+export interface Stream {
+  id: number;
+  title: string;
+  day: string;
+  date: string; // YYYY-MM-DD format
+  startTime: string; // HH:mm format (24h)
+  endTime: string; // HH:mm format (24h)
+  platform: Platform;
+  channelId?: string;
+  videoId?: string; // For YouTube videos
+  embedUrl?: string; // Custom embed URL
+  description?: string;
+}
+
+export interface StreamWithStatus extends Stream {
+  status: StreamStatus;
+  timeUntilStart?: number; // milliseconds
+}
+```
+
+<ParamField path="Stream" type="interface">
+  Stream configuration object
+  
+  <ParamField path="id" type="number" required>
+    Unique stream identifier
+  </ParamField>
+  
+  <ParamField path="title" type="string" required>
+    Stream title displayed in UI
+  </ParamField>
+  
+  <ParamField path="day" type="string" required>
+    Human-readable day (e.g., "Miércoles 10")
+  </ParamField>
+  
+  <ParamField path="date" type="string" required>
+    ISO date format YYYY-MM-DD (e.g., "2025-12-10")
+  </ParamField>
+  
+  <ParamField path="startTime" type="string" required>
+    24-hour format HH:mm (e.g., "11:00")
+  </ParamField>
+  
+  <ParamField path="endTime" type="string" required>
+    24-hour format HH:mm (e.g., "13:00")
+  </ParamField>
+  
+  <ParamField path="platform" type="'youtube' | 'twitch' | 'facebook' | 'other'" required>
+    Streaming platform identifier
+  </ParamField>
+  
+  <ParamField path="channelId" type="string">
+    Platform-specific channel ID (optional)
+  </ParamField>
+  
+  <ParamField path="videoId" type="string">
+    Video ID for YouTube or recorded streams
+  </ParamField>
+  
+  <ParamField path="embedUrl" type="string">
+    Custom embed URL if needed
+  </ParamField>
+  
+  <ParamField path="description" type="string">
+    Stream description shown in modal
+  </ParamField>
+</ParamField>
+
+## Key Features
+
+### 1. Dynamic Status Tracking
+
+Streams automatically update status based on current date/time:
+
+```typescript
+const visibleStreams = STREAMS.map(getStreamWithStatus).filter((stream) => {
+  const now = new Date();
+  const streamEndDate = new Date(`${stream.date}T${stream.endTime}:00`);
+
+  // Hide streams that ended without recording
+  if (now > streamEndDate && !stream.videoId) {
+    return false;
+  }
+
+  return true;
+});
+```
+
+Status is determined by the `getStreamWithStatus` helper from `../utils/streamHelpers`.
+
+### 2. Countdown Timer Component
+
+Nested component displays live countdown for upcoming streams:
+
+```typescript
+const CountdownTimer = ({ timeUntilStart }: { timeUntilStart: number }) => {
+  const [countdown, setCountdown] = useState(formatCountdown(timeUntilStart));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const remaining = timeUntilStart - (Date.now() - now);
+      if (remaining > 0) {
+        setCountdown(formatCountdown(remaining));
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timeUntilStart]);
+
+  return (
+    <div className={styles.countdown}>
+      <div className={styles.countdownLabel}>Comienza en:</div>
+      <div className={styles.countdownTime}>
+        {countdown.hours > 0 && (
+          <div className={styles.timeUnit}>
+            <span className={styles.timeValue}>
+              {String(countdown.hours).padStart(2, "0")}
+            </span>
+            <span className={styles.timeLabel}>hrs</span>
+          </div>
+        )}
+        {/* minutes and seconds */}
+      </div>
+    </div>
+  );
+};
+```
+
+### 3. Stream Cards
+
+Each stream is displayed with status badge and action button:
+
+```tsx
+<div className={`${styles.streamCard} ${styles[stream.status]}`}>
+  <div className={styles.statusBadge}>
+    {getStatusLabel(stream.status)}
+  </div>
+
+  <div className={styles.cardHeader}>
+    <div className={styles.platformBadge}>{stream.platform}</div>
+  </div>
+
+  <div className={styles.cardContent}>
+    <h3 className={styles.streamTitle}>{stream.title}</h3>
+
+    <div className={styles.streamInfo}>
+      <div className={styles.infoItem}>
+        <Clock size={16} />
+        <span>{stream.day} - {stream.startTime} hrs.</span>
+      </div>
+    </div>
+
+    <button
+      onClick={() => openModal(stream)}
+      className={styles.watchBtn}
+    >
+      {stream.status === "live" && "Ver Live"}
+      {stream.status === "recorded" && "Ver Video"}
+      {stream.status === "upcoming" && "Próximamente"}
+    </button>
+  </div>
+</div>
+```
+
+### 4. Video Player Modal
+
+Full-screen modal with embedded video:
+
+```tsx
+<div
+  className={styles.modalOverlay}
+  onClick={closeModal}
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+>
+  <div
+    ref={modalRef}
+    className={styles.modalContent}
+    onClick={(e) => e.stopPropagation()}
+  >
+    <button onClick={closeModal} className={styles.closeBtn}>
+      <X size={24} />
+    </button>
+
+    <h3 id="modal-title" className={styles.modalTitle}>
+      {selectedStream.title}
+    </h3>
+
+    {embedUrl && (streamWithStatus.status === "live" ||
+                  streamWithStatus.status === "recorded") ? (
+      <div className={styles.videoContainer}>
+        <iframe
+          src={embedUrl}
+          title={selectedStream.title}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className={styles.iframe}
+        ></iframe>
+      </div>
+    ) : (
+      <div className={styles.noStream}>
+        <Tv size={48} />
+        <p>{/* Status-specific message */}</p>
+      </div>
+    )}
+  </div>
+</div>
+```
+
+### 5. Keyboard and Accessibility Support
+
+Modal supports keyboard navigation:
+
+```typescript
+useEffect(() => {
+  const handleEscape = (e: KeyboardEvent) => {
+    if (e.key === "Escape" && isModalOpen) {
+      closeModal();
+    }
+  };
+
+  if (isModalOpen) {
+    document.addEventListener("keydown", handleEscape);
+    document.body.style.overflow = "hidden";
+
+    const firstFocusable = modalRef.current?.querySelector("button");
+    (firstFocusable as HTMLElement)?.focus();
+  } else {
+    document.body.style.overflow = "";
+  }
+
+  return () => {
+    document.removeEventListener("keydown", handleEscape);
+    document.body.style.overflow = "";
+  };
+}, [isModalOpen]);
+```
+
+## State Management
+
+```typescript
+const [isModalOpen, setIsModalOpen] = useState(false);
+const [selectedStream, setSelectedStream] = useState<Stream | null>(null);
+```
+
+## Component Structure
+
+```tsx
+<>
+  <section ref={sectionRef} className={styles.section} id="transmisiones">
+    <div className={styles.container}>
+      {/* Header */}
+      <div className={styles.header}>...</div>
+      
+      {/* Grid of stream cards */}
+      <div className={styles.grid}>
+        {visibleStreams.map((stream) => (
+          <div className={styles.streamCard}>...</div>
+        ))}
+      </div>
+      
+      {/* Chat info */}
+      <div className={styles.chatInfo}>...</div>
+    </div>
+  </section>
+
+  {/* Modal (rendered outside section) */}
+  {isModalOpen && selectedStream && (
+    <div className={styles.modalOverlay}>...</div>
+  )}
+</>
+```
+
+## Dependencies
+
+### External Packages
+- `lucide-react` - Tv, X, Clock, Calendar icons
+- `react` - useState, useEffect, useRef hooks
+
+### Internal Utilities
+- `../utils/animations` - fadeInUp, scaleIn functions
+- `../utils/streamHelpers` - Stream status and URL helpers:
+  - `getStreamWithStatus()` - Adds status to stream object
+  - `getEmbedUrl()` - Generates embed URL from platform/IDs
+  - `getTodayStream()` - Gets current day's stream
+  - `formatCountdown()` - Formats milliseconds to time object
+  - `getStatusLabel()` - Returns localized status label
+
+### Type Definitions
+- `../types/stream` - Stream, StreamWithStatus, StreamStatus, Platform types
+
+## Usage Example
+
+```tsx
+import LiveStreams from './components/LiveStreams';
+
+function App() {
+  return (
+    <main>
+      <LiveStreams />
+      {/* Other sections */}
+    </main>
+  );
+}
+```
+
+## Stream Configuration
+
+### Adding Video IDs for Live/Recorded Streams
+
+To enable video playback, add `videoId` to stream objects:
+
+```typescript
+const STREAMS: Stream[] = [
+  {
+    id: 1,
+    title: "Inauguración y Gestión de TI",
+    // ... other fields
+    platform: "youtube",
+    videoId: "dQw4w9WgXcQ", // YouTube video ID
+  },
+];
+```
+
+### Custom Embed URLs
+
+For custom embeds, use the `embedUrl` field:
+
+```typescript
+{
+  id: 1,
+  platform: "other",
+  embedUrl: "https://custom-platform.com/embed/stream-id",
+}
+```
+
+## Stream Status Logic
+
+Status is determined by comparing current time with stream dates:
+
+- **upcoming/scheduled**: Current time < start time
+- **live**: Current time between start and end time
+- **recorded**: Current time > end time AND has `videoId`
+- **Hidden**: Current time > end time AND no `videoId`
+
+## Accessibility Features
+
+- **ARIA roles**: Modal uses `role="dialog"` and `aria-modal="true"`
+- **ARIA labels**: Modal title uses `aria-labelledby`
+- **Keyboard support**: ESC key closes modal
+- **Focus management**: Focus moves to first interactive element in modal
+- **Body scroll lock**: Prevents background scrolling when modal open
+
+## Performance Considerations
+
+- **Conditional rendering**: Streams without recordings are hidden after end time
+- **Cleanup**: Event listeners and intervals are properly cleaned up
+- **Lazy loading**: Video embeds only load when modal opens
+
+## Related Components
+
+- [Hero](/components/hero) - "Ver Transmisiones" button (commented out)
+- [Schedule](/components/schedule) - Stream schedule aligns with event schedule

@@ -1,0 +1,308 @@
+---
+title: Sponsors Component
+description: Organizers and anniversary celebration section with institutional branding
+---
+
+# Sponsors Component
+
+The Sponsors component showcases the event organizers and celebrates the 50th anniversary of IESP Túpac Amaru. It features institutional logos, program information, and decorative elements.
+
+## Overview
+
+The Sponsors component provides:
+- **Anniversary celebration** - 50th anniversary branding and messaging
+- **Organizer logos** - Display of institutional and program logos
+- **Program information** - Details about the Desarrollo de Sistemas de Información program
+- **Sparkle animations** - Decorative animated elements
+
+## Props
+
+The Sponsors component does not accept any props. It's a self-contained section component.
+
+## File Location
+
+```
+~/workspace/source/src/components/Sponsors.tsx
+~/workspace/source/src/components/Sponsors.module.css
+```
+
+## Component Structure
+
+The component consists of three main sections:
+
+1. **Anniversary Section** - Celebrates the institution's 50-year history
+2. **Organized By Section** - Shows organizer logos with links
+3. **Career Info Section** - Details about the DSI program
+
+```tsx
+<section ref={sectionRef} className={styles.section}>
+  <div className={styles.container}>
+    {/* 1. Anniversary celebration */}
+    <div className={styles.anniversary}>...</div>
+    
+    {/* 2. Organizers */}
+    <div className={styles.organizedSection}>...</div>
+    
+    {/* 3. Career information */}
+    <div className={styles.careerInfo}>...</div>
+  </div>
+</section>
+```
+
+## Key Features
+
+### 1. Anniversary Celebration
+
+Displays the 50th anniversary logo with decorative sparkles:
+
+```tsx
+<div className={styles.anniversary}>
+  <div className={styles.anniversaryContent}>
+    <div className={styles.logoSection}>
+      {/* Sparkle decorations */}
+      <span className={styles.sparkle1}></span>
+      <span className={styles.sparkle2}></span>
+      <span className={styles.sparkle3}></span>
+      <span className={styles.sparkle4}></span>
+      
+      {/* Anniversary logo */}
+      <img
+        src="/Logo-50-años-instituto-Tupac-Amaru.png"
+        alt="Instituto de Educación Superior Público Túpac Amaru"
+        className={styles.logo}
+      />
+      
+      <p className={styles.anniversarySubtext}>
+        Formando profesionales técnicos de calidad
+      </p>
+      
+      <a
+        href="https://www.istta.edu.pe/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.websiteLink}
+      >
+        www.istta.edu.pe
+      </a>
+    </div>
+    
+    {/* Student image */}
+    <div className={styles.imageSection}>
+      <img
+        src="/chica-señalando-lado-derecho-color.png"
+        alt="Estudiante señalando"
+        className={styles.studentImage}
+      />
+    </div>
+  </div>
+</div>
+```
+
+**Sparkle Elements**: Four positioned sparkle decorations add visual interest around the logo. These are pure CSS elements styled in the CSS module.
+
+### 2. Organizer Logos
+
+Displays clickable logos of the organizing entities:
+
+```tsx
+<div className={styles.organizedSection}>
+  <div className={styles.titleWrapper}>
+    <h3 className={styles.organizedTitle}>Organizado por</h3>
+    <Building2 size={28} className={styles.titleIcon} />
+  </div>
+  <div className={styles.divider}></div>
+  
+  <div className={styles.organizedLogos}>
+    {/* Instituto logo */}
+    <a
+      href="https://www.istta.edu.pe/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.organizerLogo}
+    >
+      <img
+        src="/logo-instituto-Tupac-Amaru.png"
+        alt="Instituto Superior Túpac Amaru"
+        className={styles.logoImage}
+      />
+    </a>
+    
+    {/* DSI program logo */}
+    <a
+      href="https://www.istta.edu.pe/cdsi.php"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.organizerLogo}
+    >
+      <img
+        src="/logo-desarrollo-de-sistemas-de-informacion.png"
+        alt="Desarrollo de Sistemas de Información"
+        className={styles.logoImage}
+      />
+    </a>
+  </div>
+</div>
+```
+
+### 3. Program History
+
+Provides context about the DSI program:
+
+```tsx
+<div className={styles.careerInfo}>
+  <h3 className={styles.careerTitle}>
+    Desarrollo de Sistemas de Información
+  </h3>
+  <p className={styles.careerDescription}>
+    Anteriormente "Computación e Informática" (1983), renombrada hace 6
+    años para reflejar el enfoque moderno en desarrollo de software y
+    sistemas empresariales.
+  </p>
+</div>
+```
+
+**Historical Context**: The program was originally called "Computación e Informática" (established 1983) and was renamed 6 years ago to better reflect modern software development focus.
+
+### 4. Fade-in Animation
+
+Section animates into view on mount:
+
+```typescript
+const sectionRef = useRef<HTMLElement>(null);
+
+useEffect(() => {
+  if (sectionRef.current) {
+    fadeInUp(sectionRef.current, 1000);
+  }
+}, []);
+```
+
+## Required Assets
+
+The component requires the following image files:
+
+1. `/Logo-50-años-instituto-Tupac-Amaru.png` - 50th anniversary logo
+2. `/chica-señalando-lado-derecho-color.png` - Student illustration
+3. `/logo-instituto-Tupac-Amaru.png` - Institute logo
+4. `/logo-desarrollo-de-sistemas-de-informacion.png` - DSI program logo
+
+## External Links
+
+The component links to:
+- **Institute website**: https://www.istta.edu.pe/
+- **DSI program page**: https://www.istta.edu.pe/cdsi.php
+
+Both links open in new tabs with `target="_blank"` and `rel="noopener noreferrer"` for security.
+
+## Dependencies
+
+### External Packages
+- `lucide-react` - Building2 icon
+- `react` - useEffect, useRef hooks
+
+### Internal Utilities
+- `../utils/animations` - fadeInUp function
+
+## Usage Example
+
+```tsx
+import Sponsors from './components/Sponsors';
+
+function App() {
+  return (
+    <main>
+      {/* Other sections */}
+      <Sponsors />
+    </main>
+  );
+}
+```
+
+## CSS Module Classes
+
+Key CSS classes from `Sponsors.module.css`:
+
+- `.section` - Main section container
+- `.anniversary` - Anniversary celebration wrapper
+- `.sparkle1`, `.sparkle2`, `.sparkle3`, `.sparkle4` - Decorative sparkle elements
+- `.logoSection` - Logo container with sparkles
+- `.studentImage` - Student illustration styling
+- `.organizedSection` - Organizers section wrapper
+- `.organizedLogos` - Logo grid container
+- `.organizerLogo` - Individual logo link wrapper
+- `.careerInfo` - Program information section
+
+## Design Notes
+
+### Two-Column Layout
+
+The anniversary section uses a two-column layout:
+- **Left**: Logo, tagline, website link, sparkles
+- **Right**: Student illustration
+
+This creates visual balance and draws attention to both the branding and the human element.
+
+### Sparkle Decorations
+
+The four sparkle elements are positioned around the logo using CSS absolute positioning. They add a celebratory feel appropriate for the 50th anniversary theme.
+
+## Accessibility Features
+
+- **Alt text**: All images have descriptive alt text
+- **Semantic HTML**: Proper heading hierarchy (h3)
+- **Link labels**: Links have descriptive text and context
+- **External link handling**: `rel="noopener noreferrer"` prevents security issues
+- **Target blank**: External links open in new tabs for better UX
+
+## Customization
+
+### Updating Anniversary Year
+
+To update for future anniversaries, change the logo image and update the text in the JSX.
+
+### Adding More Organizers
+
+Add additional logo blocks to the `.organizedLogos` container:
+
+```tsx
+<a
+  href="https://new-organizer.com"
+  target="_blank"
+  rel="noopener noreferrer"
+  className={styles.organizerLogo}
+>
+  <img
+    src="/new-organizer-logo.png"
+    alt="New Organizer Name"
+    className={styles.logoImage}
+  />
+</a>
+```
+
+### Removing Sparkles
+
+To simplify the design, remove the sparkle span elements:
+
+```tsx
+<div className={styles.logoSection}>
+  {/* Remove these lines: */}
+  {/* <span className={styles.sparkle1}></span> */}
+  {/* <span className={styles.sparkle2}></span> */}
+  {/* <span className={styles.sparkle3}></span> */}
+  {/* <span className={styles.sparkle4}></span> */}
+  
+  <img src="..." />
+</div>
+```
+
+## Related Components
+
+- [Footer](/components/footer) - Also includes institutional information
+- [Hero](/components/hero) - Also displays event branding
+
+## SEO Considerations
+
+- **Alt text**: Descriptive alt text helps with image SEO
+- **Semantic HTML**: Proper heading structure aids SEO
+- **External links**: Links to official institutional pages provide credibility
+- **Keywords**: Text includes relevant keywords like "Desarrollo de Sistemas de Información", "IESP Túpac Amaru"

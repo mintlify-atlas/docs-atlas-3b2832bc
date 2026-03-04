@@ -1,0 +1,301 @@
+---
+title: 'Local Development Setup'
+description: 'Complete guide to setting up your local development environment for DEV WEEK 2025'
+---
+
+## Prerequisites
+
+Before starting local development, ensure you have the following installed:
+
+- **Node.js** 18.x or higher
+- **npm** 9.x or higher (comes with Node.js)
+- **Git** for version control
+- A modern code editor (VS Code recommended)
+
+## Initial Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd devweek-2025
+```
+
+### 2. Install Dependencies
+
+Install all project dependencies using npm:
+
+```bash
+npm install
+```
+
+This will install:
+
+**Core Dependencies:**
+- `react` (18.3.1) - UI framework
+- `react-dom` (18.3.1) - React DOM renderer
+- `@supabase/supabase-js` (2.57.4) - Backend services
+- `animejs` (3.2.1) - Animation library
+- `lucide-react` (0.344.0) - Icon library
+
+**Development Dependencies:**
+- `vite` (5.4.2) - Build tool and dev server
+- `typescript` (5.5.3) - Type checking
+- `tailwindcss` (3.4.1) - CSS framework
+- `@vitejs/plugin-react` (4.3.1) - React support for Vite
+- `eslint` (9.9.1) - Code linting
+- And other supporting tools
+
+### 3. Environment Configuration
+
+Currently, the project does not require environment variables for basic development. If you need to integrate with Supabase or other services, create a `.env` file in the root directory:
+
+```bash
+# .env (optional)
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_key
+```
+
+<Note>
+  All environment variables in Vite must be prefixed with `VITE_` to be exposed to the client.
+</Note>
+
+## Running the Development Server
+
+### Start the Dev Server
+
+Run the development server with hot module replacement (HMR):
+
+```bash
+npm run dev
+```
+
+The application will be available at:
+
+```
+http://localhost:5173
+```
+
+<Tip>
+  The port may vary if 5173 is already in use. Check the terminal output for the exact URL.
+</Tip>
+
+### Development Server Features
+
+**Hot Module Replacement (HMR)**
+
+Vite provides blazing-fast HMR out of the box:
+- Changes to React components are reflected instantly
+- CSS updates apply without full page reload
+- State is preserved during updates (when possible)
+
+**Fast Refresh**
+
+The `@vitejs/plugin-react` enables React Fast Refresh:
+- Component state is preserved during edits
+- Errors are displayed in an overlay
+- Automatic recovery after fixing errors
+
+## Type Checking
+
+Run TypeScript type checking without emitting files:
+
+```bash
+npm run typecheck
+```
+
+This uses `tsconfig.app.json` for type checking configuration. It's recommended to run this before committing code.
+
+## Code Linting
+
+Lint your code using ESLint:
+
+```bash
+npm run lint
+```
+
+The project uses:
+- ESLint 9.x with flat config format
+- `eslint-plugin-react-hooks` for React Hooks rules
+- `eslint-plugin-react-refresh` for Fast Refresh compatibility
+- TypeScript ESLint for type-aware linting
+
+## Project Structure
+
+Familiarize yourself with the project structure:
+
+```
+src/
+├── components/              # React components
+│   ├── Hero.tsx            # Main hero section with CTA
+│   ├── DateCounter.tsx     # Weekly calendar
+│   ├── Bootcamp.tsx        # Bootcamp banner
+│   ├── Speakers.tsx        # Speaker profiles with filtering
+│   ├── LiveStreams.tsx     # Live stream modal
+│   ├── RegistrationForm.tsx # Registration form
+│   ├── Sponsors.tsx        # Sponsors section
+│   └── Footer.tsx          # Footer
+├── utils/
+│   └── animations.js       # anime.js animation utilities
+├── __tests__/              # Test files
+│   ├── RegistrationForm.test.tsx
+│   └── LiveStreams.test.tsx
+├── App.tsx                 # Main application component
+├── main.tsx                # Application entry point
+└── index.css               # Global styles and CSS variables
+```
+
+## CSS Variables
+
+The project uses CSS variables for consistent theming. These are defined in `src/index.css`:
+
+```css
+--morado: #61398C    /* Primary color */
+--plomo: #535255     /* Secondary/neutral */
+--dorado: #FBBC30    /* Accent/anniversary */
+--blanco: #FFFFFF
+--negro: #000000
+--gris-1: #F5F5F5
+```
+
+<Warning>
+  Always use CSS variables instead of hardcoded colors to maintain consistency.
+</Warning>
+
+## Common Development Tasks
+
+### Adding a New Component
+
+1. Create the component file in `src/components/`:
+
+```tsx
+// src/components/MyComponent.tsx
+import { useEffect, useRef } from 'react';
+import { fadeInUp } from '../utils/animations';
+
+const MyComponent = () => {
+  const elementRef = useRef(null);
+
+  useEffect(() => {
+    fadeInUp(elementRef.current, 800);
+  }, []);
+
+  return <div ref={elementRef}>My Component</div>;
+};
+
+export default MyComponent;
+```
+
+2. Import and use it in `App.tsx`
+
+### Working with Animations
+
+The project uses anime.js for animations. Available animation utilities:
+
+- `enterStagger(target, delay)` - Staggered entrance animation
+- `hoverLift(target)` - Subtle lift on hover
+- `pulseAccent(target)` - Continuous pulse effect
+- `fadeInUp(target, duration)` - Fade in with upward motion
+- `slideInLeft(target, duration)` - Slide from left
+- `scaleIn(target, duration)` - Scale with elastic effect
+- `batchHoverLift(selector)` - Apply hover to multiple elements
+
+<Info>
+  All animations respect `prefers-reduced-motion` for accessibility.
+</Info>
+
+## Troubleshooting
+
+### Port Already in Use
+
+If port 5173 is already in use:
+
+1. Vite will automatically try the next available port
+2. Or manually specify a port in `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  server: {
+    port: 3000
+  }
+});
+```
+
+### Module Not Found Errors
+
+1. Clear node_modules and reinstall:
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+2. Clear Vite cache:
+
+```bash
+rm -rf node_modules/.vite
+```
+
+### TypeScript Errors
+
+1. Ensure your editor is using the workspace TypeScript version
+2. Run type checking manually: `npm run typecheck`
+3. Check `tsconfig.app.json` for configuration
+
+### Slow HMR
+
+If Hot Module Replacement becomes slow:
+
+1. Check the number of files being watched
+2. Exclude unnecessary directories in `vite.config.ts`
+3. Restart the dev server
+
+### CSS Not Updating
+
+1. Check that Tailwind classes are included in `tailwind.config.js` content paths
+2. Verify PostCSS is configured correctly in `postcss.config.js`
+3. Clear browser cache and hard reload
+
+### lucide-react Icons Not Loading
+
+The project explicitly excludes `lucide-react` from optimization in `vite.config.ts`. If you encounter issues:
+
+1. Check the exclude configuration is present
+2. Restart the dev server
+3. Import icons individually: `import { IconName } from 'lucide-react'`
+
+## IDE Configuration
+
+### VS Code Recommended Extensions
+
+- ESLint (`dbaeumer.vscode-eslint`)
+- Tailwind CSS IntelliSense (`bradlc.vscode-tailwindcss`)
+- TypeScript Vue Plugin (Volar) for better TS support
+
+### VS Code Settings
+
+Add to `.vscode/settings.json`:
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ]
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Building" icon="hammer" href="/development/building">
+    Learn how to build for production
+  </Card>
+  <Card title="Testing" icon="flask" href="/development/testing">
+    Run tests and ensure code quality
+  </Card>
+</CardGroup>

@@ -1,0 +1,138 @@
+---
+title: Introduction
+description: Learn about DEV WEEK 2025, an annual student technology event organized by IESP Túpac Amaru's Information Systems Development program.
+---
+
+## What is DEV WEEK 2025?
+
+DEV WEEK is an annual student technology event organized by the Information Systems Development program at Instituto de Educación Superior Público Túpac Amaru (ISTTA) in Cusco, Peru. The 2025 edition takes place from December 10-12, 2025, as part of ISTTA's 50th anniversary celebration.
+
+This single-page event website showcases the schedule, speakers, live streams, and registration system for the three-day technology conference featuring cybersecurity bootcamps, IT management talks, and student-led technical sessions.
+
+## Key features
+
+The DEV WEEK 2025 website includes:
+
+- **Responsive hero section** with animated binary rain effect and countdown clock
+- **Interactive schedule** showing daily events and speaker sessions
+- **Speaker profiles** with filtering by day and expandable details
+- **Live stream integration** supporting YouTube and Twitch embeds
+- **Registration form** with validation and localStorage persistence
+- **Smooth animations** powered by anime.js with accessibility support
+- **SEO optimization** including structured data and Open Graph tags
+- **Lazy loading** for optimal performance on all devices
+
+## Tech stack
+
+The project is built with modern web technologies:
+
+<CardGroup cols={2}>
+  <Card title="React 18" icon="react">
+    Component-based UI with TypeScript for type safety
+  </Card>
+  <Card title="Vite" icon="bolt">
+    Lightning-fast build tool and development server
+  </Card>
+  <Card title="Tailwind CSS" icon="palette">
+    Utility-first CSS framework for base styles
+  </Card>
+  <Card title="anime.js" icon="wand-magic-sparkles">
+    Smooth JavaScript animations with reduced-motion support
+  </Card>
+</CardGroup>
+
+### Core dependencies
+
+From `package.json`:
+
+```json
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "animejs": "^3.2.1",
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
+```
+
+### Development tools
+
+The project includes:
+
+- **TypeScript** for type-safe component development
+- **ESLint** with React hooks and refresh plugins
+- **PostCSS** with Autoprefixer for browser compatibility
+- **CSS Modules** for component-specific styling
+
+## Who it's for
+
+This documentation is designed for:
+
+- **Developers** maintaining or extending the DEV WEEK website
+- **Students** learning React, TypeScript, and modern web development
+- **Event organizers** looking to understand the codebase structure
+- **Contributors** wanting to add features or fix bugs
+
+<Note>
+  The website is organized by students from the VI Cycle of Information Systems Development at IESP Túpac Amaru.
+</Note>
+
+## Project structure
+
+The source code follows a component-based architecture:
+
+```
+src/
+├── components/           # React components
+│   ├── Hero.tsx         # Main hero section with CTA
+│   ├── CountdownClock.tsx  # Event countdown timer
+│   ├── Schedule.tsx     # Daily event schedule
+│   ├── Speakers.tsx     # Speaker profiles with filtering
+│   ├── LiveStreams.tsx  # Live stream modal
+│   ├── RegistrationForm.tsx  # Registration with validation
+│   ├── Sponsors.tsx     # Sponsor logos
+│   └── Footer.tsx       # Site footer
+├── utils/
+│   ├── animations.js    # anime.js animation functions
+│   └── streamHelpers.ts # Stream utility functions
+├── data/
+│   └── schedule.ts      # Event schedule data
+├── types/               # TypeScript type definitions
+├── __tests__/           # Unit tests
+├── App.tsx              # Main app component
+└── main.tsx             # Application entry point
+```
+
+## Design system
+
+The website uses CSS variables for consistent theming:
+
+<CodeGroup>
+
+```css Color Variables
+--morado: #61398C    /* Primary purple */
+--plomo: #535255     /* Secondary gray */
+--dorado: #FBBC30    /* Gold accent (anniversary) */
+--blanco: #FFFFFF
+--negro: #000000
+--gris-1: #F5F5F5
+```
+
+</CodeGroup>
+
+<Warning>
+  Never use hardcoded colors in components. Always reference CSS variables for consistency.
+</Warning>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get the project running locally in minutes
+  </Card>
+  <Card title="Installation" icon="download" href="/installation">
+    Detailed setup instructions and troubleshooting
+  </Card>
+</CardGroup>

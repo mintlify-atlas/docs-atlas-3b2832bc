@@ -1,0 +1,376 @@
+---
+title: Footer Component
+description: Site footer with social links, navigation, and developer credits
+---
+
+# Footer Component
+
+The Footer component provides site-wide navigation, social media links, event information, and developer credits. It serves as the closing section of the DEV WEEK 2025 website.
+
+## Overview
+
+The Footer component provides:
+- **Event description** - Brief overview of DEV WEEK 2025
+- **Social media links** - Facebook, Instagram, and TikTok with icons
+- **Quick navigation** - Links to main page sections with smooth scrolling
+- **Copyright notice** - Institutional copyright information
+- **Developer credits** - Attribution to Nyuro Frame
+
+## Props
+
+The Footer component does not accept any props. It's a self-contained section component.
+
+## File Location
+
+```
+~/workspace/source/src/components/Footer.tsx
+~/workspace/source/src/components/Footer.module.css
+```
+
+## Component Structure
+
+```tsx
+<footer className={styles.footer}>
+  <div className={styles.container}>
+    {/* Main content grid */}
+    <div className={styles.grid}>
+      {/* Column 1: Event info and social */}
+      <div className={styles.column}>...</div>
+      
+      {/* Column 2: Quick links */}
+      <div className={styles.column}>...</div>
+    </div>
+    
+    {/* Bottom section: Copyright and credits */}
+    <div className={styles.bottom}>...</div>
+  </div>
+</footer>
+```
+
+## Key Features
+
+### 1. Event Information
+
+First column displays event summary and social links:
+
+```tsx
+<div className={styles.column}>
+  <h3 className={styles.columnTitle}>DEV WEEK 2025</h3>
+  <p className={styles.text}>
+    Semana del Desarrollo del IESP Túpac Amaru. Evento tecnológico con
+    Bootcamp de Ciberseguridad y Gestión de TI. Del 10 al 12 de
+    diciembre.
+  </p>
+  <div className={styles.social}>
+    {/* Social links */}
+  </div>
+</div>
+```
+
+### 2. Social Media Links
+
+Three social platforms with icon components:
+
+```tsx
+<div className={styles.social}>
+  {/* Facebook */}
+  <a
+    href="https://www.facebook.com/share/1FFHtQDqx8/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className={styles.socialLink}
+    aria-label="Facebook"
+  >
+    <Facebook size={20} />
+  </a>
+  
+  {/* Instagram */}
+  <a
+    href="https://www.instagram.com/dev.week?igsh=YTU2NmM5Z3VhZWVo"
+    target="_blank"
+    rel="noopener noreferrer"
+    className={styles.socialLink}
+    aria-label="Instagram"
+  >
+    <Instagram size={20} />
+  </a>
+  
+  {/* TikTok */}
+  <a
+    href="https://www.tiktok.com/@devweek?_t=ZS-90zI7zBet2e&_r=1"
+    target="_blank"
+    rel="noopener noreferrer"
+    className={styles.socialLink}
+    aria-label="TikTok"
+  >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
+    </svg>
+  </a>
+</div>
+```
+
+**Note**: TikTok uses a custom SVG since Lucide React doesn't include a TikTok icon. Facebook and Instagram use Lucide icons.
+
+### 3. Quick Links Navigation
+
+Second column provides navigation to main sections:
+
+```tsx
+<div className={styles.column}>
+  <h3 className={styles.columnTitle}>Enlaces Rápidos</h3>
+  <ul className={styles.linkList}>
+    <li>
+      <a
+        href="#about"
+        onClick={(e) => {
+          e.preventDefault();
+          document
+            .getElementById("about")
+            ?.scrollIntoView({ behavior: "smooth" });
+        }}
+        className={styles.link}
+      >
+        Acerca del Evento
+      </a>
+    </li>
+    <li>
+      <a
+        href="#cronograma"
+        onClick={(e) => {
+          e.preventDefault();
+          document
+            .getElementById("cronograma")
+            ?.scrollIntoView({ behavior: "smooth" });
+        }}
+        className={styles.link}
+      >
+        Cronograma
+      </a>
+    </li>
+    <li>
+      <a
+        href="#ponentes"
+        onClick={(e) => {
+          e.preventDefault();
+          document
+            .getElementById("ponentes")
+            ?.scrollIntoView({ behavior: "smooth" });
+        }}
+        className={styles.link}
+      >
+        Ponentes
+      </a>
+    </li>
+    <li>
+      <a
+        href="#transmisiones"
+        onClick={(e) => {
+          e.preventDefault();
+          document
+            .getElementById("transmisiones")
+            ?.scrollIntoView({ behavior: "smooth" });
+        }}
+        className={styles.link}
+      >
+        Transmisiones
+      </a>
+    </li>
+  </ul>
+</div>
+```
+
+**Smooth Scrolling**: Links use `preventDefault()` and `scrollIntoView({ behavior: "smooth" })` for animated navigation instead of instant jumps.
+
+### 4. Copyright and Credits
+
+Bottom section displays copyright and developer attribution:
+
+```tsx
+<div className={styles.bottom}>
+  <p className={styles.copyright}>
+    © 2025 IESP Túpac Amaru - Instituto de Educación Superior Público
+    Túpac Amaru. Todos los derechos reservados.
+  </p>
+  
+  <div className={styles.credits}>
+    <span className={styles.creditsText}>Desarrollado por</span>
+    <a
+      href="https://nyuroframe.expandeya.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <img
+        src="/logo-nyuro-frame.png"
+        alt="Nyuro Frame"
+        className={styles.creditsLogo}
+      />
+    </a>
+  </div>
+</div>
+```
+
+## Social Media URLs
+
+<ParamField path="Facebook" type="string">
+  https://www.facebook.com/share/1FFHtQDqx8/
+</ParamField>
+
+<ParamField path="Instagram" type="string">
+  https://www.instagram.com/dev.week?igsh=YTU2NmM5Z3VhZWVo
+</ParamField>
+
+<ParamField path="TikTok" type="string">
+  https://www.tiktok.com/@devweek?_t=ZS-90zI7zBet2e&_r=1
+</ParamField>
+
+## Navigation Links
+
+The footer links to these section IDs:
+
+- `#about` - About section
+- `#cronograma` - Schedule section
+- `#ponentes` - Speakers section
+- `#transmisiones` - LiveStreams section
+
+**Important**: Ensure these IDs match the actual section components in your application.
+
+## Required Assets
+
+The component requires:
+- `/logo-nyuro-frame.png` - Nyuro Frame developer logo
+
+## Dependencies
+
+### External Packages
+- `lucide-react` - Facebook and Instagram icons
+- No React hooks needed (stateless component)
+
+## Usage Example
+
+```tsx
+import Footer from './components/Footer';
+
+function App() {
+  return (
+    <>
+      <main>
+        {/* Other sections */}
+      </main>
+      <Footer />
+    </>
+  );
+}
+```
+
+## CSS Module Classes
+
+Key classes from `Footer.module.css`:
+
+- `.footer` - Main footer element
+- `.container` - Content wrapper
+- `.grid` - Two-column grid layout
+- `.column` - Individual column
+- `.columnTitle` - Column heading
+- `.text` - Body text
+- `.social` - Social links container
+- `.socialLink` - Individual social link
+- `.linkList` - Navigation list
+- `.link` - Navigation link
+- `.bottom` - Bottom copyright/credits section
+- `.copyright` - Copyright text
+- `.credits` - Developer credits container
+- `.creditsLogo` - Developer logo image
+
+## Responsive Design
+
+The footer uses a grid layout that typically:
+- **Desktop**: Two columns side-by-side
+- **Mobile**: Stacks into single column
+
+Check `Footer.module.css` for specific breakpoints.
+
+## Accessibility Features
+
+- **Semantic HTML**: Uses `<footer>` element
+- **ARIA labels**: Social links have descriptive `aria-label` attributes
+- **Link labels**: All links have clear, descriptive text
+- **External links**: `rel="noopener noreferrer"` for security
+- **Keyboard navigation**: All links are keyboard accessible
+- **List structure**: Navigation uses proper `<ul>` and `<li>` elements
+
+## SEO Considerations
+
+- **Structured data**: Footer provides site-wide links for crawlers
+- **Social links**: Direct links to official social media profiles
+- **Copyright**: Clear ownership and date information
+- **Internal links**: Helps with site structure and crawlability
+
+## Customization
+
+### Adding Social Links
+
+Add new social platform links:
+
+```tsx
+<a
+  href="https://linkedin.com/..."
+  target="_blank"
+  rel="noopener noreferrer"
+  className={styles.socialLink}
+  aria-label="LinkedIn"
+>
+  <Linkedin size={20} />
+</a>
+```
+
+### Adding Navigation Links
+
+Add more quick links:
+
+```tsx
+<li>
+  <a
+    href="#new-section"
+    onClick={(e) => {
+      e.preventDefault();
+      document
+        .getElementById("new-section")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }}
+    className={styles.link}
+  >
+    New Section
+  </a>
+</li>
+```
+
+### Updating Copyright Year
+
+Update the year in the copyright text:
+
+```tsx
+<p className={styles.copyright}>
+  © 2026 IESP Túpac Amaru...
+</p>
+```
+
+## Developer Credits
+
+The footer credits **Nyuro Frame** as the developer:
+- **Website**: https://nyuroframe.expandeya.com/
+- **Logo**: `/logo-nyuro-frame.png`
+
+To update credits, modify the bottom section.
+
+## Related Components
+
+- [Hero](/components/hero) - CTA buttons navigate to sections linked in footer
+- [Sponsors](/components/sponsors) - Also displays institutional branding
+
+## Performance Notes
+
+- **Stateless**: Component has no state or side effects
+- **Lightweight**: Minimal dependencies
+- **SVG icons**: Small file size, scalable
+- **External links**: Open in new tabs to keep main site open

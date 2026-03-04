@@ -1,0 +1,537 @@
+---
+title: 'Testing'
+description: 'Testing strategy and implementation for the DEV WEEK 2025 application'
+---
+
+## Testing Overview
+
+The DEV WEEK 2025 project includes unit tests for React components using **Vitest** and **React Testing Library**. While test scripts are not yet configured in `package.json`, the test infrastructure is in place.
+
+## Testing Stack
+
+The project uses the following testing libraries (detected from test files):
+
+- **Vitest** - Fast unit test framework (Vite-native)
+- **React Testing Library** - Component testing utilities
+- **@testing-library/react** - React-specific testing utilities
+- **@testing-library/user-event** - User interaction simulation
+
+<Info>
+  Vitest is specifically designed for Vite projects and provides exceptional speed and compatibility.
+</Info>
+
+## Setting Up Testing
+
+Since testing dependencies are not yet in `package.json`, you'll need to install them:
+
+### Install Testing Dependencies
+
+```bash
+npm install --save-dev vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom
+```
+
+### Update package.json Scripts
+
+Add test scripts to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  }
+}
+```
+
+### Create Vitest Configuration
+
+Create `vitest.config.ts` in the project root:
+
+```typescript
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+    css: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+      ]
+    }
+  },
+});
+```
+
+### Create Test Setup File
+
+Create `src/test/setup.ts`:
+
+```typescript
+import { expect, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import * as matchers from '@testing-library/jest-dom/matchers';
+
+// Extend Vitest's expect with jest-dom matchers
+expect.extend(matchers);
+
+// Cleanup after each test
+afterEach(() => {
+  cleanup();
+});
+```
+
+## Existing Tests
+
+The project includes two test files in `src/__tests__/`:
+
+### RegistrationForm Tests
+
+Location: `src/__tests__/RegistrationForm.test.tsx`
+
+Tests the registration form component:
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import RegistrationForm from '../components/RegistrationForm';
+
+describe('RegistrationForm', () => {
+  it('renders registration form with title', () => {
+    render(<RegistrationForm />);
+    expect(screen.getByText('Inscripción')).toBeInTheDocument();
+  });
+
+  it('renders all required form fields', () => {
+    render(<RegistrationForm />);
+    expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/apellido/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/correo/i)).toBeInTheDocument();
+  });
+
+  it('renders submit button', () => {
+    render(<RegistrationForm />);
+    expect(screen.getByRole('button', { name: /completar inscripción/i })).toBeInTheDocument();
+  });
+});
+```
+
+**What it tests:**
+- Form renders with correct title
+- All required form fields are present
+- Submit button is rendered
+
+### LiveStreams Tests
+
+Location: `src/__tests__/LiveStreams.test.tsx`
+
+Tests the live streams component and modal functionality:
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import LiveStreams from '../components/LiveStreams';
+
+describe('LiveStreams', () => {
+  it('renders live streams section with title', () => {
+    render(<LiveStreams />);
+    expect(screen.getByText('Transmisiones en Vivo')).toBeInTheDocument();
+  });
+
+  it('renders stream cards', () => {
+    render(<LiveStreams />);
+    const watchButtons = screen.getAllByRole('button', { name: /ver transmisión/i });
+    expect(watchButtons.length).toBeGreaterThan(0);
+  });
+
+  it('opens modal when clicking watch button', () => {
+    render(<LiveStreams />);
+    const firstWatchButton = screen.getAllByRole('button', { name: /ver transmisión/i })[0];
+    fireEvent.click(firstWatchButton);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+});
+```
+
+**What it tests:**
+- Component renders with correct title
+- Stream cards are rendered
+- Modal opens when clicking watch button
+- Modal has correct accessibility role
+
+## Running Tests
+
+Once dependencies are installed and configuration is complete:
+
+### Run All Tests
+
+```bash
+npm run test
+```
+
+This starts Vitest in watch mode, which:
+- Runs all tests initially
+- Watches for file changes
+- Re-runs affected tests automatically
+
+### Run Tests Once (CI Mode)
+
+```bash
+npm run test -- --run
+```
+
+Runs all tests once and exits (useful for CI/CD pipelines).
+
+### Run Tests with UI
+
+```bash
+npm run test:ui
+```
+
+Opens Vitest's interactive UI in your browser for a visual testing experience.
+
+### Run Tests with Coverage
+
+```bash
+npm run test:coverage
+```
+
+Generates code coverage reports:
+- Console summary
+- HTML report in `coverage/` directory
+- JSON report for tooling
+
+<Tip>
+  Open `coverage/index.html` in your browser to see detailed coverage reports.
+</Tip>
+
+### Run Specific Test File
+
+```bash
+npm run test RegistrationForm
+```
+
+### Run Tests Matching Pattern
+
+```bash
+npm run test -- --grep="modal"
+```
+
+## Writing Tests
+
+### Basic Component Test Structure
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import MyComponent from '../components/MyComponent';
+
+describe('MyComponent', () => {
+  it('renders correctly', () => {
+    render(<MyComponent />);
+    expect(screen.getByText('Expected Text')).toBeInTheDocument();
+  });
+});
+```
+
+### Testing User Interactions
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import MyForm from '../components/MyForm';
+
+describe('MyForm', () => {
+  it('handles form submission', async () => {
+    const user = userEvent.setup();
+    render(<MyForm />);
+    
+    const input = screen.getByLabelText(/name/i);
+    await user.type(input, 'John Doe');
+    
+    const button = screen.getByRole('button', { name: /submit/i });
+    await user.click(button);
+    
+    expect(screen.getByText(/success/i)).toBeInTheDocument();
+  });
+});
+```
+
+### Testing with Props
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import Speaker from '../components/Speaker';
+
+describe('Speaker', () => {
+  it('displays speaker information', () => {
+    const speaker = {
+      name: 'Jane Smith',
+      role: 'Senior Developer',
+      topic: 'React Best Practices'
+    };
+    
+    render(<Speaker {...speaker} />);
+    
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('Senior Developer')).toBeInTheDocument();
+    expect(screen.getByText('React Best Practices')).toBeInTheDocument();
+  });
+});
+```
+
+### Testing Async Behavior
+
+```typescript
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import DataComponent from '../components/DataComponent';
+
+describe('DataComponent', () => {
+  it('loads and displays data', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      json: async () => ({ data: 'test data' })
+    });
+    global.fetch = mockFetch;
+    
+    render(<DataComponent />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('test data')).toBeInTheDocument();
+    });
+  });
+});
+```
+
+## Testing Best Practices
+
+### 1. Use Accessible Queries
+
+Prefer queries that reflect how users interact with your app:
+
+```typescript
+// ✅ Good - accessible queries
+screen.getByRole('button', { name: /submit/i });
+screen.getByLabelText(/email/i);
+screen.getByText(/welcome/i);
+
+// ❌ Avoid - implementation details
+screen.getByTestId('submit-button');
+screen.getByClassName('btn-primary');
+```
+
+### 2. Test User Behavior, Not Implementation
+
+```typescript
+// ✅ Good - tests what users see and do
+it('allows users to register for the event', async () => {
+  render(<RegistrationForm />);
+  await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+  expect(screen.getByText(/success/i)).toBeInTheDocument();
+});
+
+// ❌ Avoid - tests internal state
+it('updates state when typing', () => {
+  const { component } = render(<RegistrationForm />);
+  expect(component.state.email).toBe('');
+});
+```
+
+### 3. Use Descriptive Test Names
+
+```typescript
+// ✅ Good - clear and descriptive
+it('displays error message when email is invalid');
+it('opens modal when clicking watch button');
+it('renders all required form fields');
+
+// ❌ Avoid - vague or technical
+it('works correctly');
+it('test 1');
+it('renders component');
+```
+
+### 4. Keep Tests Independent
+
+Each test should be able to run in isolation:
+
+```typescript
+// ✅ Good - each test is independent
+describe('RegistrationForm', () => {
+  it('validates email field', () => {
+    render(<RegistrationForm />);
+    // Test email validation
+  });
+  
+  it('validates name field', () => {
+    render(<RegistrationForm />);
+    // Test name validation
+  });
+});
+
+// ❌ Avoid - tests depend on each other
+let form;
+it('renders form', () => {
+  form = render(<RegistrationForm />);
+});
+it('validates email', () => {
+  // Depends on previous test
+});
+```
+
+### 5. Mock External Dependencies
+
+```typescript
+import { vi } from 'vitest';
+
+// Mock Supabase client
+vi.mock('@supabase/supabase-js', () => ({
+  createClient: () => ({
+    from: () => ({
+      insert: vi.fn().mockResolvedValue({ data: {}, error: null })
+    })
+  })
+}));
+```
+
+## Testing Animation Components
+
+When testing components with animations (using anime.js):
+
+```typescript
+import { describe, it, expect, vi } from 'vitest';
+import { render } from '@testing-library/react';
+import Hero from '../components/Hero';
+
+// Mock anime.js
+vi.mock('animejs', () => ({
+  default: vi.fn()
+}));
+
+describe('Hero', () => {
+  it('renders without animation errors', () => {
+    render(<Hero />);
+    expect(screen.getByText(/DEV WEEK/i)).toBeInTheDocument();
+  });
+});
+```
+
+## Testing Accessibility
+
+```typescript
+import { render } from '@testing-library/react';
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
+
+it('has no accessibility violations', async () => {
+  const { container } = render(<RegistrationForm />);
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+```
+
+## Continuous Integration
+
+Add testing to your CI/CD pipeline:
+
+### GitHub Actions Example
+
+```yaml
+# .github/workflows/test.yml
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test -- --run
+      - run: npm run test:coverage
+```
+
+## Coverage Goals
+
+Aim for reasonable coverage targets:
+
+- **Statements**: 80%+
+- **Branches**: 75%+
+- **Functions**: 80%+
+- **Lines**: 80%+
+
+<Note>
+  Focus on testing critical paths and user flows rather than achieving 100% coverage.
+</Note>
+
+## What to Test
+
+**High Priority:**
+- Form validation and submission
+- User interactions (clicks, typing, navigation)
+- Conditional rendering
+- Error states
+- Accessibility attributes
+
+**Medium Priority:**
+- Default props and states
+- Data transformation
+- Loading states
+
+**Low Priority:**
+- Styling and layout (use visual regression testing)
+- Third-party library functionality
+- Simple presentational components
+
+## Troubleshooting
+
+### Test Fails: "toBeInTheDocument is not a function"
+
+Ensure `@testing-library/jest-dom` is imported in your setup file.
+
+### Tests Pass Locally but Fail in CI
+
+1. Check Node.js version consistency
+2. Ensure all dependencies are installed (`npm ci`)
+3. Verify environment variables are set
+
+### Slow Test Execution
+
+1. Avoid unnecessary `waitFor` with long timeouts
+2. Mock network requests
+3. Use `--reporter=dot` for cleaner output
+4. Run tests in parallel (Vitest does this by default)
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Local Setup" icon="laptop-code" href="/development/local-setup">
+    Set up your development environment
+  </Card>
+  <Card title="Building" icon="hammer" href="/development/building">
+    Build for production deployment
+  </Card>
+</CardGroup>

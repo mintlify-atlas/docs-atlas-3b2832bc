@@ -1,0 +1,451 @@
+---
+title: Animations
+description: Animation utilities and functions for DEV WEEK 2025 site using Anime.js
+---
+
+# Animations
+
+The DEV WEEK 2025 site uses [Anime.js](https://animejs.com/) for smooth, performant animations throughout the application. All animation functions are centralized in `src/utils/animations.js` and respect user motion preferences.
+
+## Core Animation Functions
+
+### enterStagger()
+
+Staggered entrance animation for multiple elements appearing sequentially.
+
+**Signature:**
+```typescript
+enterStagger(target: any, delay?: number): void
+```
+
+**Parameters:**
+- `target` - Single element, array of elements, or CSS selector
+- `delay` - Delay between each element (default: 50ms)
+
+**Animation Properties:**
+- Opacity: 0 → 1
+- TranslateY: 12px → 0
+- Duration: 600ms
+- Easing: `easeOutExpo`
+
+**Usage Example:**
+```tsx
+// From Hero.tsx:3,14-16
+import { enterStagger } from "../utils/animations";
+
+const elements = [titleRef.current, subtitleRef.current, ctaRef.current];
+enterStagger(elements.filter(Boolean), 100);
+```
+
+**Real Implementation:**
+```javascript
+// src/utils/animations.js:7-18
+export const enterStagger = (target, delay = 50) => {
+  if (shouldReduceMotion()) return;
+
+  anime({
+    targets: target,
+    opacity: [0, 1],
+    translateY: [12, 0],
+    delay: anime.stagger(delay),
+    duration: 600,
+    easing: 'easeOutExpo'
+  });
+};
+```
+
+---
+
+### fadeInUp()
+
+Fade in element while moving it up from below.
+
+**Signature:**
+```typescript
+fadeInUp(target: any, duration?: number): void
+```
+
+**Parameters:**
+- `target` - Element or CSS selector to animate
+- `duration` - Animation duration in ms (default: 800ms)
+
+**Animation Properties:**
+- Opacity: 0 → 1
+- TranslateY: 30px → 0
+- Easing: `easeOutCubic`
+
+**Usage Example:**
+```tsx
+// From Speakers.tsx:3,89
+import { fadeInUp } from "../utils/animations";
+
+if (sectionRef.current) {
+  fadeInUp(sectionRef.current, 1000);
+}
+```
+
+**Implementation:**
+```javascript
+// src/utils/animations.js:62-80
+export const fadeInUp = (target, duration = 800) => {
+  if (shouldReduceMotion()) {
+    anime({
+      targets: target,
+      opacity: [0, 1],
+      duration: 50,
+      easing: 'linear'
+    });
+    return;
+  }
+
+  anime({
+    targets: target,
+    opacity: [0, 1],
+    translateY: [30, 0],
+    duration: duration,
+    easing: 'easeOutCubic'
+  });
+};
+```
+
+---
+
+### slideInLeft()
+
+Slide element in from the left side.
+
+**Signature:**
+```typescript
+slideInLeft(target: any, duration?: number): void
+```
+
+**Parameters:**
+- `target` - Element or CSS selector
+- `duration` - Animation duration in ms (default: 700ms)
+
+**Animation Properties:**
+- Opacity: 0 → 1
+- TranslateX: -50px → 0
+- Easing: `easeOutCubic`
+
+**Implementation:**
+```javascript
+// src/utils/animations.js:82-100
+export const slideInLeft = (target, duration = 700) => {
+  if (shouldReduceMotion()) {
+    anime({
+      targets: target,
+      opacity: [0, 1],
+      duration: 50,
+      easing: 'linear'
+    });
+    return;
+  }
+
+  anime({
+    targets: target,
+    opacity: [0, 1],
+    translateX: [-50, 0],
+    duration: duration,
+    easing: 'easeOutCubic'
+  });
+};
+```
+
+---
+
+### scaleIn()
+
+Scale element from smaller to normal size with elastic effect.
+
+**Signature:**
+```typescript
+scaleIn(target: any, duration?: number): void
+```
+
+**Parameters:**
+- `target` - Element or CSS selector
+- `duration` - Animation duration in ms (default: 500ms)
+
+**Animation Properties:**
+- Scale: 0.8 → 1
+- Opacity: 0 → 1
+- Easing: `easeOutElastic(1, .6)`
+
+**Implementation:**
+```javascript
+// src/utils/animations.js:102-112
+export const scaleIn = (target, duration = 500) => {
+  if (shouldReduceMotion()) return;
+
+  anime({
+    targets: target,
+    scale: [0.8, 1],
+    opacity: [0, 1],
+    duration: duration,
+    easing: 'easeOutElastic(1, .6)'
+  });
+};
+```
+
+---
+
+### hoverLift()
+
+Adds hover animation to lift element up on mouse enter.
+
+**Signature:**
+```typescript
+hoverLift(target: any): void
+```
+
+**Parameters:**
+- `target` - Element or CSS selector
+
+**Animation Properties (on hover):**
+- TranslateY: 0 → -4px
+- Scale: 1 → 1.02
+- BoxShadow: Enhanced depth
+- Duration: 200ms
+
+**Implementation:**
+```javascript
+// src/utils/animations.js:20-47
+export const hoverLift = (target) => {
+  if (shouldReduceMotion()) return;
+
+  const element = typeof target === 'string' ? document.querySelector(target) : target;
+  if (!element) return;
+
+  element.addEventListener('mouseenter', () => {
+    anime({
+      targets: element,
+      translateY: -4,
+      scale: 1.02,
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+      duration: 200,
+      easing: 'easeOutExpo'
+    });
+  });
+
+  element.addEventListener('mouseleave', () => {
+    anime({
+      targets: element,
+      translateY: 0,
+      scale: 1,
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      duration: 200,
+      easing: 'easeOutExpo'
+    });
+  });
+};
+```
+
+---
+
+### pulseAccent()
+
+Continuous pulsing animation for accent elements.
+
+**Signature:**
+```typescript
+pulseAccent(target: any): void
+```
+
+**Parameters:**
+- `target` - Element or CSS selector
+
+**Animation Properties:**
+- Scale: 1 → 1.05 → 1 (looping)
+- Opacity: 1 → 0.85 → 1 (looping)
+- Duration: 1500ms
+- Loop: Infinite
+
+**Implementation:**
+```javascript
+// src/utils/animations.js:49-60
+export const pulseAccent = (target) => {
+  if (shouldReduceMotion()) return;
+
+  anime({
+    targets: target,
+    scale: [1, 1.05, 1],
+    opacity: [1, 0.85, 1],
+    duration: 1500,
+    easing: 'easeInOutQuad',
+    loop: true
+  });
+};
+```
+
+---
+
+### batchHoverLift()
+
+Applies hover lift effect to multiple elements matching a selector.
+
+**Signature:**
+```typescript
+batchHoverLift(selector: string): void
+```
+
+**Parameters:**
+- `selector` - CSS selector for elements
+
+**Usage Example:**
+```tsx
+// From Speakers.tsx:3,92-94
+import { batchHoverLift } from "../utils/animations";
+
+const timer = setTimeout(() => {
+  batchHoverLift(`.${styles.speakerCard}`);
+}, 500);
+```
+
+**Implementation:**
+```javascript
+// src/utils/animations.js:114-122
+export const batchHoverLift = (selector) => {
+  if (shouldReduceMotion()) return;
+
+  const elements = document.querySelectorAll(selector);
+  elements.forEach(element => {
+    element.style.willChange = 'transform';
+    hoverLift(element);
+  });
+};
+```
+
+---
+
+## Accessibility: Reduced Motion Support
+
+All animations respect the `prefers-reduced-motion` user preference for accessibility.
+
+**Motion Preference Detection:**
+```javascript
+// src/utils/animations.js:3-5
+const shouldReduceMotion = () => {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};
+```
+
+**CSS Implementation:**
+```css
+/* src/index.css:86-94 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+**Behavior:**
+- When reduced motion is preferred, most animations are skipped entirely
+- `fadeInUp` and `slideInLeft` fall back to simple opacity fade (50ms)
+- All other animation functions return early without executing
+
+---
+
+## IntersectionObserver Integration
+
+Many components use IntersectionObserver to trigger animations when elements enter viewport:
+
+**Example from Schedule.tsx:**
+```tsx
+// src/components/Schedule.tsx:10,20-35
+import { enterStagger } from "../utils/animations";
+
+const sectionRef = useRef<HTMLDivElement>(null);
+
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const cards = document.querySelectorAll(`.${styles.scheduleCard}`);
+          enterStagger(cards, 100);
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+  if (sectionRef.current) {
+    observer.observe(sectionRef.current);
+  }
+  return () => observer.disconnect();
+}, []);
+```
+
+**Example from About.tsx:**
+```tsx
+// src/components/About.tsx:37-63
+const [hasAnimated, setHasAnimated] = useState(false);
+
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          anime({
+            targets: `.${styles.aboutCard}`,
+            translateY: [50, 0],
+            opacity: [0, 1],
+            duration: 800,
+            delay: anime.stagger(150),
+            easing: "easeOutExpo",
+          });
+          setHasAnimated(true);
+          observer.disconnect(); // Performance: Disconnect after animating
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+  // ...
+}, [hasAnimated]);
+```
+
+---
+
+## Animation Library
+
+**Package:** `animejs` v3.2.1
+
+**Installation:**
+```bash
+npm install animejs@^3.2.1
+```
+
+**Documentation:** https://animejs.com/documentation/
+
+---
+
+## Performance Considerations
+
+1. **Will-change property**: Applied in `batchHoverLift` for transform optimization
+2. **Observer cleanup**: Always disconnect IntersectionObserver after animation
+3. **Animation skipping**: Reduced motion preference skips unnecessary animations
+4. **Staggered delays**: Used for sequential element animations
+5. **CSS animations**: Heavy animations like binary rain use CSS keyframes (Hero component)
+
+---
+
+## TypeScript Declarations
+
+Type definitions are available in `src/utils/animations.d.ts`:
+
+```typescript
+// src/utils/animations.d.ts
+export function enterStagger(target: any, delay?: number): void;
+export function hoverLift(target: any): void;
+export function pulseAccent(target: any): void;
+export function fadeInUp(target: any, duration?: number): void;
+export function slideInLeft(target: any, duration?: number): void;
+export function scaleIn(target: any, duration?: number): void;
+export function batchHoverLift(selector: string): void;
+```

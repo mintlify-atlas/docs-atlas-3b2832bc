@@ -1,0 +1,707 @@
+---
+title: SEO Optimization
+description: SEO implementation and structured data for DEV WEEK 2025
+---
+
+# SEO Optimization
+
+The DEV WEEK 2025 site implements comprehensive SEO strategies including semantic HTML, meta tags, Open Graph, Twitter Cards, JSON-LD structured data, and proper indexing configuration.
+
+## Meta Tags
+
+### Basic SEO Meta Tags
+
+**Title:**
+```html
+<!-- index.html:26-28 -->
+<title>
+  DEV WEEK 2025 - IESP Túpac Amaru | Evento Tecnológico 10-12 Diciembre
+</title>
+```
+
+**Description:**
+```html
+<!-- index.html:29-32 -->
+<meta
+  name="description"
+  content="DEV WEEK 2025: Bootcamp Ciberseguridad OWASP + Gestión TI. 10-12 diciembre, IESP Túpac Amaru Cusco. Evento presencial y online gratis."
+/>
+```
+
+**Keywords:**
+```html
+<!-- index.html:33-36 -->
+<meta
+  name="keywords"
+  content="DEV WEEK, IESP Túpac Amaru, Desarrollo Sistemas Información, OWASP Cusco, ciberseguridad, bootcamp tecnológico, gestión TI, evento tecnológico Cusco, programación Perú"
+/>
+```
+
+**Robots:**
+```html
+<!-- index.html:37 -->
+<meta name="robots" content="index, follow" />
+```
+
+**Canonical URL:**
+```html
+<!-- index.html:38 -->
+<link rel="canonical" href="https://semanainformatica2025.expandeya.com/" />
+```
+
+---
+
+## Open Graph (Facebook)
+
+Open Graph tags enable rich social media previews when the site is shared on Facebook, LinkedIn, and other platforms.
+
+### Implementation
+
+```html
+<!-- index.html:40-57 -->
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta
+  property="og:url"
+  content="https://semanainformatica2025.expandeya.com/"
+/>
+<meta property="og:site_name" content="DEV WEEK 2025 - IESP Túpac Amaru" />
+<meta property="og:title" content="DEV WEEK 2025 - Semana del Desarrollo" />
+<meta
+  property="og:description"
+  content="Únete al evento tecnológico de Cusco. 10-12 de diciembre 2025. Bootcamp de Ciberseguridad OWASP y Gestión de TI."
+/>
+<meta
+  property="og:image"
+  content="https://semanainformatica2025.expandeya.com/og-image.jpg"
+/>
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+```
+
+### Open Graph Properties
+
+| Property | Value | Purpose |
+|----------|-------|----------|
+| `og:type` | `website` | Defines content type |
+| `og:url` | Full URL | Canonical URL for sharing |
+| `og:site_name` | DEV WEEK 2025 - IESP Túpac Amaru | Site identifier |
+| `og:title` | DEV WEEK 2025 - Semana del Desarrollo | Share title |
+| `og:description` | Event description | Share description |
+| `og:image` | /og-image.jpg | Social preview image |
+| `og:image:width` | 1200 | Image width in pixels |
+| `og:image:height` | 630 | Image height in pixels |
+
+### Image Requirements
+
+**Recommended dimensions:**
+- Facebook/LinkedIn: 1200 × 630 px
+- Minimum: 600 × 315 px
+- Aspect ratio: 1.91:1
+
+**Image guidelines:**
+- Format: JPG or PNG
+- File size: < 8 MB
+- No text overlay (or minimal)
+- High contrast, clear imagery
+
+---
+
+## Twitter Cards
+
+Twitter Cards enable rich media previews on Twitter (X).
+
+### Implementation
+
+```html
+<!-- index.html:59-69 -->
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="DEV WEEK 2025 - IESP Túpac Amaru" />
+<meta
+  name="twitter:description"
+  content="Semana del Desarrollo 2025. Bootcamp Ciberseguridad + Gestión TI. 10-12 diciembre, Cusco."
+/>
+<meta
+  name="twitter:image"
+  content="https://semanainformatica2025.expandeya.com/og-image.jpg"
+/>
+```
+
+### Twitter Card Types
+
+**Current:** `summary_large_image`
+
+| Property | Value | Purpose |
+|----------|-------|----------|
+| `twitter:card` | `summary_large_image` | Large image card format |
+| `twitter:title` | Event title | Tweet title |
+| `twitter:description` | Short description | Tweet description |
+| `twitter:image` | /og-image.jpg | Preview image |
+
+**Card types available:**
+- `summary` - Small image card
+- `summary_large_image` - Large image card (recommended)
+- `app` - Mobile app card
+- `player` - Video/audio player card
+
+### Image Requirements
+
+**Large image card:**
+- Minimum: 300 × 157 px
+- Maximum: 4096 × 4096 px
+- Aspect ratio: 2:1 (recommended)
+- File size: < 5 MB
+
+---
+
+## JSON-LD Structured Data
+
+JSON-LD (JavaScript Object Notation for Linked Data) provides structured data that search engines use to understand content and create rich results.
+
+### Event Schema
+
+```html
+<!-- index.html:73-125 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": "DEV WEEK 2025 - Semana del Desarrollo",
+  "description": "Evento tecnológico organizado por estudiantes del VI Ciclo de Desarrollo de Sistemas de Información del IESP Túpac Amaru. Incluye Bootcamp de Ciberseguridad con OWASP Cusco y ponencias de Gestión de TI.",
+  "startDate": "2025-12-10T11:00:00-05:00",
+  "endDate": "2025-12-12T13:00:00-05:00",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
+  "location": {
+    "@type": "Place",
+    "name": "Auditórium del IESP Túpac Amaru",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Cusco",
+      "addressRegion": "Cusco",
+      "addressCountry": "PE"
+    }
+  },
+  "organizer": {
+    "@type": "EducationalOrganization",
+    "name": "Instituto de Educación Superior Público Túpac Amaru",
+    "url": "https://www.istta.edu.pe/",
+    "department": {
+      "@type": "Organization",
+      "name": "Programa de Estudios de Desarrollo de Sistemas de Información"
+    }
+  },
+  "performer": [
+    {
+      "@type": "Organization",
+      "name": "OWASP Cusco",
+      "description": "Capítulo local de OWASP dedicado a mejorar la seguridad del software"
+    },
+    {
+      "@type": "Person",
+      "name": "Rodrigo Salazar",
+      "jobTitle": "Especialista en Gestión de TI"
+    }
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "PEN",
+    "availability": "https://schema.org/InStock",
+    "url": "https://semanainformatica2025.expandeya.com/"
+  },
+  "isAccessibleForFree": true,
+  "inLanguage": "es-PE"
+}
+</script>
+```
+
+### Schema Properties Breakdown
+
+**Event Properties:**
+
+| Property | Value | Purpose |
+|----------|-------|----------|
+| `@context` | https://schema.org | Schema.org vocabulary |
+| `@type` | Event | Defines as event type |
+| `name` | DEV WEEK 2025... | Event name |
+| `description` | Full description | Event details |
+| `startDate` | 2025-12-10T11:00:00-05:00 | ISO 8601 start datetime |
+| `endDate` | 2025-12-12T13:00:00-05:00 | ISO 8601 end datetime |
+| `eventStatus` | EventScheduled | Event happening |
+| `eventAttendanceMode` | MixedEventAttendanceMode | In-person + online |
+| `isAccessibleForFree` | true | Free admission |
+| `inLanguage` | es-PE | Spanish (Peru) |
+
+**Location Schema:**
+```json
+"location": {
+  "@type": "Place",
+  "name": "Auditórium del IESP Túpac Amaru",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Cusco",
+    "addressRegion": "Cusco",
+    "addressCountry": "PE"
+  }
+}
+```
+
+**Organizer Schema:**
+```json
+"organizer": {
+  "@type": "EducationalOrganization",
+  "name": "Instituto de Educación Superior Público Túpac Amaru",
+  "url": "https://www.istta.edu.pe/",
+  "department": {
+    "@type": "Organization",
+    "name": "Programa de Estudios de Desarrollo de Sistemas de Información"
+  }
+}
+```
+
+**Performers Schema:**
+```json
+"performer": [
+  {
+    "@type": "Organization",
+    "name": "OWASP Cusco",
+    "description": "Capítulo local de OWASP..."
+  },
+  {
+    "@type": "Person",
+    "name": "Rodrigo Salazar",
+    "jobTitle": "Especialista en Gestión de TI"
+  }
+]
+```
+
+**Offers Schema:**
+```json
+"offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "PEN",
+  "availability": "https://schema.org/InStock",
+  "url": "https://semanainformatica2025.expandeya.com/"
+}
+```
+
+### Rich Results
+
+This structured data enables Google to show:
+- Event cards in search results
+- Date, time, location prominently displayed
+- "Free" badge
+- Add to calendar button
+- Event details in Google Maps
+- Knowledge panel information
+
+---
+
+## Robots.txt
+
+Controls search engine crawler access.
+
+### Implementation
+
+```txt
+# public/robots.txt
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas (if any)
+Disallow: /admin/
+Disallow: /private/
+
+# Allow all images
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.gif$
+Allow: /*.svg$
+Allow: /*.webp$
+
+# Sitemap location
+Sitemap: https://semanainformatica2025.expandeya.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+```
+
+### Directives Explained
+
+| Directive | Value | Purpose |
+|-----------|-------|----------|
+| `User-agent` | * | Applies to all crawlers |
+| `Allow` | / | Allow all pages |
+| `Disallow` | /admin/, /private/ | Block these paths |
+| `Allow` | Image extensions | Explicitly allow images |
+| `Sitemap` | URL | Point to sitemap.xml |
+| `Crawl-delay` | 1 | Wait 1 second between requests |
+
+---
+
+## Sitemap.xml
+
+XML sitemap helps search engines discover and index pages.
+
+### Implementation
+
+```xml
+<!-- public/sitemap.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  
+  <!-- Main page -->
+  <url>
+    <loc>https://semanainformatica2025.expandeya.com/</loc>
+    <lastmod>2025-11-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Update lastmod when content changes -->
+  <!-- Add more URLs as site grows -->
+  
+</urlset>
+```
+
+### XML Tags Explained
+
+| Tag | Value | Purpose |
+|-----|-------|----------|
+| `<loc>` | URL | Page location |
+| `<lastmod>` | 2025-11-27 | Last modified date (YYYY-MM-DD) |
+| `<changefreq>` | daily | Update frequency hint |
+| `<priority>` | 1.0 | Relative importance (0.0-1.0) |
+
+**Change frequency values:**
+- `always` - Document changes with every access
+- `hourly` - Hourly updates
+- `daily` - Daily updates (current)
+- `weekly` - Weekly updates
+- `monthly` - Monthly updates
+- `yearly` - Yearly updates
+- `never` - Archived content
+
+### Submitting Sitemap
+
+**Google Search Console:**
+1. Go to [Google Search Console](https://search.google.com/search-console)
+2. Select your property
+3. Navigate to Sitemaps
+4. Enter: `https://semanainformatica2025.expandeya.com/sitemap.xml`
+5. Click Submit
+
+**Bing Webmaster Tools:**
+1. Go to [Bing Webmaster](https://www.bing.com/webmasters)
+2. Add/select site
+3. Navigate to Sitemaps
+4. Submit sitemap URL
+
+---
+
+## HTML Language Declaration
+
+```html
+<!-- index.html:2 -->
+<html lang="es-PE">
+```
+
+**Benefits:**
+- Helps search engines identify language
+- Improves regional search rankings
+- Assists screen readers with pronunciation
+- Enables proper translation services
+
+**Format:**
+- `es` - Spanish language
+- `PE` - Peru region
+
+---
+
+## Performance & SEO
+
+### DNS Prefetch & Preconnect
+
+```html
+<!-- index.html:6-9 -->
+<!-- Performance: DNS prefetch and preconnect for faster font loading -->
+<link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+```
+
+**Benefits:**
+- Reduces DNS lookup time
+- Establishes early connections
+- Faster font loading
+- Improves Core Web Vitals
+
+### Viewport Meta Tag
+
+```html
+<!-- index.html:20 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+```
+
+**Benefits:**
+- Mobile-friendly rendering
+- Required for mobile-first indexing
+- Prevents Google's "Not mobile-friendly" warning
+
+---
+
+## PWA & SEO
+
+### Web App Manifest
+
+```html
+<!-- index.html:17 -->
+<link rel="manifest" href="/manifest.json" />
+```
+
+**Manifest content:**
+```json
+// public/manifest.json
+{
+  "name": "DEV WEEK 2025 - ISTTA",
+  "short_name": "DEV WEEK",
+  "description": "Evento tecnológico estudiantil anual del Programa de Estudios de Desarrollo de Sistemas de Información del Instituto de Educación Superior Túpac Amaru",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#61398C",
+  "theme_color": "#61398C",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "technology", "events"],
+  "lang": "es-PE",
+  "dir": "ltr"
+}
+```
+
+**SEO Benefits:**
+- Improves mobile experience
+- Enables "Add to Home Screen"
+- Better engagement metrics
+- Progressive Web App badge in Chrome
+
+### Theme Color
+
+```html
+<!-- index.html:71 -->
+<meta name="theme-color" content="#61398C" />
+```
+
+**Effect:**
+- Colors browser UI on mobile
+- Consistent with brand colors
+- Professional appearance
+
+---
+
+## Favicons
+
+```html
+<!-- index.html:11-14 -->
+<!-- Favicons -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+```
+
+**Sizes:**
+- 16×16 - Browser tabs
+- 32×32 - Browser tabs (high DPI)
+- 180×180 - Apple Touch Icon (iOS)
+
+**Generation tool:** [RealFaviconGenerator](https://realfavicongenerator.net/)
+
+---
+
+## Semantic HTML for SEO
+
+### Proper Heading Hierarchy
+
+```tsx
+// src/components/Hero.tsx:65-68
+<h1 className="sr-only">
+  DEV WEEK 2025 - Semana del Desarrollo del IESP Túpac Amaru Cusco
+</h1>
+```
+
+**Best practices:**
+- One H1 per page
+- Logical hierarchy (H1 → H2 → H3)
+- Descriptive heading text
+- Not skipping levels
+
+### Main Content Landmark
+
+```tsx
+// src/App.tsx:22-51
+<main id="main-content">
+  {/* Page sections */}
+</main>
+```
+
+**Benefits:**
+- Helps search engines identify primary content
+- Improves accessibility
+- Semantic HTML structure
+
+---
+
+## Testing & Validation
+
+### SEO Testing Tools
+
+**Google Tools:**
+- [Rich Results Test](https://search.google.com/test/rich-results) - Validate structured data
+- [Mobile-Friendly Test](https://search.google.com/test/mobile-friendly) - Check mobile compatibility
+- [PageSpeed Insights](https://pagespeed.web.dev/) - Performance & SEO
+- [Search Console](https://search.google.com/search-console) - Monitor search performance
+
+**Social Media Validators:**
+- [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) - Test Open Graph
+- [Twitter Card Validator](https://cards-dev.twitter.com/validator) - Test Twitter Cards
+- [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/) - Test LinkedIn shares
+
+**Schema Validators:**
+- [Schema.org Validator](https://validator.schema.org/) - Validate JSON-LD
+- [Google Rich Results Test](https://search.google.com/test/rich-results) - Google-specific validation
+
+**Other Tools:**
+- [Lighthouse](https://developer.chrome.com/docs/lighthouse/) - Comprehensive audit
+- [Screaming Frog](https://www.screamingfrog.co.uk/seo-spider/) - Site crawler
+- [Ahrefs](https://ahrefs.com/) - SEO analysis
+- [SEMrush](https://www.semrush.com/) - SEO & marketing
+
+---
+
+## Core Web Vitals
+
+Google's page experience signals for ranking:
+
+### Metrics
+
+**LCP (Largest Contentful Paint):**
+- Target: < 2.5 seconds
+- Current optimization: Lazy loading, code splitting
+
+**FID (First Input Delay):**
+- Target: < 100 milliseconds
+- Current optimization: Minimal JavaScript blocking
+
+**CLS (Cumulative Layout Shift):**
+- Target: < 0.1
+- Current optimization: Reserved space for images, no layout shifts
+
+### Implementation Strategies
+
+**Code Splitting:**
+```tsx
+// src/App.tsx:5-10
+const About = lazy(() => import("./components/About"));
+const Schedule = lazy(() => import("./components/Schedule"));
+// ... more lazy imports
+```
+
+**Suspense Boundaries:**
+```tsx
+// src/App.tsx:24-26
+<Suspense fallback={<div style={{ minHeight: "200px" }} />}>
+  <About />
+</Suspense>
+```
+
+---
+
+## Local SEO
+
+### Geographic Information
+
+**Structured Data:**
+```json
+"location": {
+  "@type": "Place",
+  "name": "Auditórium del IESP Túpac Amaru",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Cusco",
+    "addressRegion": "Cusco",
+    "addressCountry": "PE"
+  }
+}
+```
+
+**Benefits:**
+- Appears in local search results
+- Shows in Google Maps
+- "Near me" search visibility
+- Regional targeting
+
+---
+
+## Best Practices Summary
+
+### Essential Checklist
+
+- ✅ Unique, descriptive title (50-60 characters)
+- ✅ Compelling meta description (150-160 characters)
+- ✅ Canonical URL specified
+- ✅ Open Graph tags for social sharing
+- ✅ Twitter Cards implemented
+- ✅ JSON-LD structured data (Event schema)
+- ✅ Robots.txt configured
+- ✅ Sitemap.xml created and submitted
+- ✅ Language declared (es-PE)
+- ✅ Mobile-friendly (responsive design)
+- ✅ Fast page load (lazy loading, code splitting)
+- ✅ Semantic HTML (H1, main, section)
+- ✅ Alt text for images
+- ✅ HTTPS enabled
+- ✅ PWA manifest
+
+### Ongoing SEO Tasks
+
+1. **Monitor search performance** - Google Search Console
+2. **Update lastmod in sitemap** - When content changes
+3. **Check broken links** - Monthly audit
+4. **Analyze Core Web Vitals** - Weekly/monthly
+5. **Review search rankings** - Track target keywords
+6. **Update structured data** - Keep event info current
+7. **Fresh content** - Add blog posts or updates
+
+---
+
+## Resources
+
+- [Google Search Central](https://developers.google.com/search)
+- [Schema.org Documentation](https://schema.org/)
+- [Open Graph Protocol](https://ogp.me/)
+- [Twitter Cards Guide](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards)
+- [Web.dev SEO](https://web.dev/learn/seo/)
+- [Moz Beginner's Guide to SEO](https://moz.com/beginners-guide-to-seo)

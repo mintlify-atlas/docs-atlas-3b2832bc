@@ -1,0 +1,176 @@
+---
+title: 'Project Structure Overview'
+description: 'Complete overview of the DEV WEEK 2025 project folder structure and organization'
+icon: 'folder-tree'
+---
+
+## Project Organization
+
+The DEV WEEK 2025 project is organized into a clean, modular structure that follows React and TypeScript best practices.
+
+### Root Source Structure
+
+```
+~/workspace/source/src/
+├── components/        # React components with CSS Modules
+├── data/             # Static data and content
+├── types/            # TypeScript type definitions
+├── utils/            # Utility functions and helpers
+├── __tests__/        # Component tests
+├── App.tsx           # Main application component
+├── main.tsx          # Application entry point
+├── index.css         # Global styles and CSS variables
+├── animejs.d.ts      # Anime.js type declarations
+├── vite-env.d.ts     # Vite environment types
+└── types.ts          # Shared type definitions
+```
+
+## Directory Breakdown
+
+<AccordionGroup>
+  <Accordion title="components/" icon="shapes">
+    Contains all React components, each with its corresponding CSS Module file:
+    
+    - **About.tsx** / About.module.css
+    - **Bootcamp.tsx** / Bootcamp.module.css
+    - **CountdownClock.tsx** / CountdownClock.module.css
+    - **Footer.tsx** / Footer.module.css
+    - **Hero.tsx** / Hero.module.css
+    - **LiveStreams.tsx** / LiveStreams.module.css
+    - **RegistrationForm.tsx** / RegistrationForm.module.css
+    - **Schedule.tsx** / Schedule.module.css
+    - **Speakers.tsx** / Speakers.module.css
+    - **Sponsors.tsx** / Sponsors.module.css
+
+    Each component is self-contained with its styles, promoting modularity and maintainability.
+  </Accordion>
+
+  <Accordion title="data/" icon="database">
+    Static data files that populate the application:
+    
+    - **schedule.ts** - Event schedule data including days, activities, speakers, and times
+    
+    This separation of data from components makes content updates easier without touching component logic.
+  </Accordion>
+
+  <Accordion title="types/" icon="code">
+    TypeScript type definitions for type safety:
+    
+    - **stream.ts** - Stream-related types (StreamStatus, Platform, Stream, StreamWithStatus)
+    
+    These types ensure type safety across the application when working with streams and live content.
+  </Accordion>
+
+  <Accordion title="utils/" icon="wrench">
+    Utility functions and helper modules:
+    
+    - **animations.js** - Anime.js animation functions
+    - **animations.d.ts** - TypeScript declarations for animations
+    - **streamHelpers.ts** - Helper functions for stream management
+    
+    Utilities are kept separate for reusability and easier testing.
+  </Accordion>
+
+  <Accordion title="__tests__/" icon="flask">
+    Component test files:
+    
+    - **LiveStreams.test.tsx**
+    - **RegistrationForm.test.tsx**
+    
+    Tests ensure component reliability and catch regressions.
+  </Accordion>
+</AccordionGroup>
+
+## Key Files
+
+### App.tsx
+
+The main application component that orchestrates the entire page structure:
+
+```typescript
+import { lazy, Suspense } from "react";
+import Hero from "./components/Hero";
+import Footer from "./components/Footer";
+
+// Lazy load all non-critical components for better performance
+const About = lazy(() => import("./components/About"));
+const Schedule = lazy(() => import("./components/Schedule"));
+const Speakers = lazy(() => import("./components/Speakers"));
+const LiveStreams = lazy(() => import("./components/LiveStreams"));
+const Sponsors = lazy(() => import("./components/Sponsors"));
+```
+
+<Info>
+  The App component implements **code splitting** with React.lazy() to improve initial load performance by only loading critical components (Hero, Footer) immediately.
+</Info>
+
+### main.tsx
+
+The application entry point that renders the React app:
+
+```typescript
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+```
+
+### index.css
+
+Global styles, CSS variables, and Tailwind imports. See [Styling](/structure/styling) for details.
+
+## Design Principles
+
+<CardGroup cols={2}>
+  <Card title="Component Modularity" icon="cubes">
+    Each component is self-contained with its own styles, making them easy to maintain and test independently.
+  </Card>
+  
+  <Card title="Type Safety" icon="shield-check">
+    TypeScript types are centralized in dedicated files, ensuring consistency across the application.
+  </Card>
+  
+  <Card title="Performance First" icon="gauge-high">
+    Lazy loading and code splitting ensure fast initial page loads and optimal user experience.
+  </Card>
+  
+  <Card title="Clean Separation" icon="layer-group">
+    Data, logic, styles, and utilities are separated into logical directories for better organization.
+  </Card>
+</CardGroup>
+
+## File Naming Conventions
+
+| File Type | Convention | Example |
+|-----------|-----------|----------|
+| React Components | PascalCase.tsx | `Hero.tsx`, `Schedule.tsx` |
+| CSS Modules | PascalCase.module.css | `Hero.module.css` |
+| Utility Files | camelCase.ts | `animations.js`, `streamHelpers.ts` |
+| Type Definitions | camelCase.ts or .d.ts | `types.ts`, `animations.d.ts` |
+| Data Files | camelCase.ts | `schedule.ts` |
+
+<Tip>
+  This structure makes it easy to locate files - if you're looking for a component's styles, just look for the matching `.module.css` file in the same directory.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components" icon="shapes" href="/structure/components">
+    Learn about the component architecture and lazy loading pattern
+  </Card>
+  
+  <Card title="Styling" icon="paintbrush" href="/structure/styling">
+    Explore the CSS Modules system and design tokens
+  </Card>
+  
+  <Card title="Animations" icon="sparkles" href="/structure/animations">
+    Discover the anime.js integration and animation utilities
+  </Card>
+</CardGroup>

@@ -1,0 +1,604 @@
+---
+title: 'Animation System'
+description: 'Anime.js integration, animation utilities, and motion design patterns'
+icon: 'sparkles'
+---
+
+## Animation Architecture
+
+DEV WEEK 2025 uses **anime.js** for smooth, performant animations throughout the site.
+
+<Info>
+  All animations respect the user's `prefers-reduced-motion` setting for accessibility.
+</Info>
+
+## Animation Utilities
+
+Animation functions are centralized in `src/utils/animations.js` for reusability.
+
+### File Structure
+
+```
+src/utils/
+├── animations.js       # Animation implementations
+└── animations.d.ts     # TypeScript type declarations
+```
+
+## Available Animation Functions
+
+### enterStagger
+
+Staggered fade-in and slide-up animation for multiple elements.
+
+```javascript title="src/utils/animations.js"
+export const enterStagger = (target, delay = 50) => {
+  if (shouldReduceMotion()) return;
+
+  anime({
+    targets: target,
+    opacity: [0, 1],
+    translateY: [12, 0],
+    delay: anime.stagger(delay),
+    duration: 600,
+    easing: 'easeOutExpo'
+  });
+};
+```
+
+**Parameters:**
+- `target` - DOM element(s) to animate
+- `delay` - Delay between each element (default: 50ms)
+
+**Usage:**
+
+```typescript title="src/components/Hero.tsx"
+import { enterStagger } from "../utils/animations";
+
+const Hero = () => {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const elements = [titleRef.current, subtitleRef.current, ctaRef.current];
+    enterStagger(elements.filter(Boolean), 100);
+  }, []);
+
+  return (
+    <section>
+      <h1 ref={titleRef}>DEV WEEK 2025</h1>
+      <p ref={subtitleRef}>10-12 de diciembre</p>
+      <div ref={ctaRef}>{/* Buttons */}</div>
+    </section>
+  );
+};
+```
+
+### fadeInUp
+
+Fade in while sliding up - classic entrance animation.
+
+```javascript title="src/utils/animations.js"
+export const fadeInUp = (target, duration = 800) => {
+  if (shouldReduceMotion()) {
+    anime({
+      targets: target,
+      opacity: [0, 1],
+      duration: 50,
+      easing: 'linear'
+    });
+    return;
+  }
+
+  anime({
+    targets: target,
+    opacity: [0, 1],
+    translateY: [30, 0],
+    duration: duration,
+    easing: 'easeOutCubic'
+  });
+};
+```
+
+**Parameters:**
+- `target` - Element to animate
+- `duration` - Animation duration in ms (default: 800)
+
+**Usage:**
+
+```typescript
+import { fadeInUp } from "../utils/animations";
+
+useEffect(() => {
+  fadeInUp('.section-title', 1000);
+}, []);
+```
+
+### slideInLeft
+
+Slide in from the left with fade.
+
+```javascript title="src/utils/animations.js"
+export const slideInLeft = (target, duration = 700) => {
+  if (shouldReduceMotion()) {
+    anime({
+      targets: target,
+      opacity: [0, 1],
+      duration: 50,
+      easing: 'linear'
+    });
+    return;
+  }
+
+  anime({
+    targets: target,
+    opacity: [0, 1],
+    translateX: [-50, 0],
+    duration: duration,
+    easing: 'easeOutCubic'
+  });
+};
+```
+
+**Parameters:**
+- `target` - Element to animate
+- `duration` - Animation duration in ms (default: 700)
+
+### scaleIn
+
+Scale up from 80% with fade and elastic easing.
+
+```javascript title="src/utils/animations.js"
+export const scaleIn = (target, duration = 500) => {
+  if (shouldReduceMotion()) return;
+
+  anime({
+    targets: target,
+    scale: [0.8, 1],
+    opacity: [0, 1],
+    duration: duration,
+    easing: 'easeOutElastic(1, .6)'
+  });
+};
+```
+
+**Parameters:**
+- `target` - Element to animate
+- `duration` - Animation duration in ms (default: 500)
+
+### hoverLift
+
+Interactive hover effect - lifts element on mouse enter.
+
+```javascript title="src/utils/animations.js"
+export const hoverLift = (target) => {
+  if (shouldReduceMotion()) return;
+
+  const element = typeof target === 'string' ? document.querySelector(target) : target;
+  if (!element) return;
+
+  element.addEventListener('mouseenter', () => {
+    anime({
+      targets: element,
+      translateY: -4,
+      scale: 1.02,
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+      duration: 200,
+      easing: 'easeOutExpo'
+    });
+  });
+
+  element.addEventListener('mouseleave', () => {
+    anime({
+      targets: element,
+      translateY: 0,
+      scale: 1,
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      duration: 200,
+      easing: 'easeOutExpo'
+    });
+  });
+};
+```
+
+**Usage:**
+
+```typescript
+import { hoverLift } from "../utils/animations";
+
+useEffect(() => {
+  hoverLift('.card');
+}, []);
+```
+
+### batchHoverLift
+
+Apply hover lift to multiple elements matching a selector.
+
+```javascript title="src/utils/animations.js"
+export const batchHoverLift = (selector) => {
+  if (shouldReduceMotion()) return;
+
+  const elements = document.querySelectorAll(selector);
+  elements.forEach(element => {
+    element.style.willChange = 'transform';
+    hoverLift(element);
+  });
+};
+```
+
+**Usage:**
+
+```typescript
+import { batchHoverLift } from "../utils/animations";
+
+useEffect(() => {
+  batchHoverLift('.speaker-card');
+}, []);
+```
+
+### pulseAccent
+
+Continuous pulsing animation for attention.
+
+```javascript title="src/utils/animations.js"
+export const pulseAccent = (target) => {
+  if (shouldReduceMotion()) return;
+
+  anime({
+    targets: target,
+    scale: [1, 1.05, 1],
+    opacity: [1, 0.85, 1],
+    duration: 1500,
+    easing: 'easeInOutQuad',
+    loop: true
+  });
+};
+```
+
+**Usage:**
+
+```typescript
+import { pulseAccent } from "../utils/animations";
+
+useEffect(() => {
+  pulseAccent('.live-indicator');
+}, []);
+```
+
+## TypeScript Declarations
+
+```typescript title="src/utils/animations.d.ts"
+export function enterStagger(target: any, delay?: number): void;
+export function hoverLift(target: any): void;
+export function pulseAccent(target: any): void;
+export function fadeInUp(target: any, duration?: number): void;
+export function slideInLeft(target: any, duration?: number): void;
+export function scaleIn(target: any, duration?: number): void;
+export function batchHoverLift(selector: string): void;
+```
+
+## Animation Patterns
+
+### Intersection Observer Pattern
+
+Animate when component enters viewport:
+
+```typescript title="src/components/Schedule.tsx"
+import { useEffect, useRef } from "react";
+import { enterStagger } from "../utils/animations";
+import styles from "./Schedule.module.css";
+
+export default function Schedule() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const cards = document.querySelectorAll(`.${styles.scheduleCard}`);
+            enterStagger(cards, 100);
+          }
+        });
+      },
+      { threshold: 0.1 } // Trigger when 10% visible
+    );
+    
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={sectionRef} className={styles.section}>
+      {/* Cards */}
+    </section>
+  );
+}
+```
+
+<Info>
+  **IntersectionObserver** is efficient because it only triggers animations when elements are actually visible to the user.
+</Info>
+
+### Prevent Re-animation Pattern
+
+```typescript title="src/components/About.tsx"
+import { useEffect, useRef, useState } from "react";
+import anime from "animejs";
+import styles from "./About.module.css";
+
+export default function About() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            anime({
+              targets: `.${styles.aboutCard}`,
+              translateY: [50, 0],
+              opacity: [0, 1],
+              duration: 800,
+              delay: anime.stagger(150),
+              easing: "easeOutExpo",
+            });
+            setHasAnimated(true);
+            observer.disconnect(); // Stop observing after animation
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasAnimated]);
+
+  return (
+    <section ref={sectionRef}>
+      {/* Content */}
+    </section>
+  );
+}
+```
+
+<Tip>
+  Use `hasAnimated` state to ensure animations only play once, even if the user scrolls back up.
+</Tip>
+
+### Direct Anime.js Usage
+
+For complex or component-specific animations:
+
+```typescript
+import anime from "animejs";
+
+// Staggered card entrance
+anime({
+  targets: `.${styles.aboutCard}`,
+  translateY: [50, 0],
+  opacity: [0, 1],
+  duration: 800,
+  delay: anime.stagger(150), // 150ms delay between each card
+  easing: "easeOutExpo",
+});
+```
+
+## Reduced Motion Support
+
+All animation functions check for user's motion preference:
+
+```javascript title="src/utils/animations.js"
+const shouldReduceMotion = () => {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};
+
+export const fadeInUp = (target, duration = 800) => {
+  if (shouldReduceMotion()) {
+    // Instant fade with no movement
+    anime({
+      targets: target,
+      opacity: [0, 1],
+      duration: 50,
+      easing: 'linear'
+    });
+    return;
+  }
+
+  // Full animation
+  anime({
+    targets: target,
+    opacity: [0, 1],
+    translateY: [30, 0],
+    duration: duration,
+    easing: 'easeOutCubic'
+  });
+};
+```
+
+<Warning>
+  Always respect `prefers-reduced-motion` - some users experience motion sickness from animations.
+</Warning>
+
+## Animation Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use IntersectionObserver" icon="eye">
+    Only animate elements when they're visible to save CPU and improve performance.
+  </Accordion>
+  
+  <Accordion title="Disconnect observers" icon="plug">
+    Always clean up observers in useEffect return function to prevent memory leaks.
+  </Accordion>
+  
+  <Accordion title="Respect reduced motion" icon="universal-access">
+    Check `shouldReduceMotion()` in all animation functions for accessibility.
+  </Accordion>
+  
+  <Accordion title="Use will-change sparingly" icon="gauge-high">
+    Apply `will-change: transform` only to elements that will definitely animate.
+  </Accordion>
+  
+  <Accordion title="Optimize stagger delays" icon="clock">
+    Keep stagger delays between 50-150ms for best visual flow without feeling slow.
+  </Accordion>
+</AccordionGroup>
+
+## Easing Functions
+
+Anime.js provides many easing options:
+
+| Easing | Use Case |
+|--------|----------|
+| `easeOutExpo` | Sharp deceleration - great for UI entrances |
+| `easeOutCubic` | Smooth deceleration - general purpose |
+| `easeInOutQuad` | Smooth acceleration and deceleration - loops |
+| `easeOutElastic(1, .6)` | Bouncy effect - playful interactions |
+| `linear` | Constant speed - reduced motion fallback |
+
+## Custom Animations in Components
+
+### Hero Binary Rain
+
+The Hero component features a custom binary rain animation:
+
+```typescript title="src/components/Hero.tsx"
+const binaryRainRef = useRef<HTMLDivElement>(null);
+
+useEffect(() => {
+  if (binaryRainRef.current) {
+    const container = binaryRainRef.current;
+    const numColumns = 15;
+
+    for (let i = 0; i < numColumns; i++) {
+      const column = document.createElement("div");
+      column.className = styles.binaryColumn;
+      column.style.left = `${(i / numColumns) * 100}%`;
+      
+      // Random duration for variety
+      const duration = Math.random() * 15 + 30;
+      column.style.animationDuration = `${duration}s`;
+      
+      // Staggered delays
+      const delay = (i / numColumns) * 15;
+      column.style.animationDelay = `-${delay}s`;
+      
+      // Create binary digits
+      const numDigits = Math.floor(Math.random() * 11) + 40;
+      for (let j = 0; j < numDigits; j++) {
+        const digit = document.createElement("span");
+        digit.textContent = Math.random() > 0.5 ? "1" : "0";
+        digit.className = styles.binaryDigit;
+        digit.style.animationDelay = `${Math.random() * 2}s`;
+        column.appendChild(digit);
+      }
+      
+      container.appendChild(column);
+    }
+  }
+
+  return () => {
+    if (binaryRainRef.current) {
+      binaryRainRef.current.innerHTML = "";
+    }
+  };
+}, []);
+```
+
+CSS animations:
+
+```css title="src/components/Hero.module.css"
+@keyframes binaryFall {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@keyframes binaryBlink {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.binaryColumn {
+  animation: binaryFall linear infinite;
+  will-change: transform;
+}
+
+.binaryDigit {
+  animation: binaryBlink 2s ease-in-out infinite;
+}
+```
+
+<Info>
+  This animation uses **CSS animations** for better performance compared to JavaScript-based animation for continuous effects.
+</Info>
+
+## Performance Tips
+
+<CardGroup cols={2}>
+  <Card title="Use CSS animations for loops" icon="rotate">
+    CSS animations are more performant for continuous/looping effects
+  </Card>
+  
+  <Card title="Animate transform and opacity" icon="sliders">
+    These properties are GPU-accelerated and don't trigger layout recalculation
+  </Card>
+  
+  <Card title="Add will-change carefully" icon="gauge">
+    Use `will-change: transform` but remove it after animation completes
+  </Card>
+  
+  <Card title="Limit simultaneous animations" icon="layer-group">
+    Don't animate too many elements at once - use stagger delays
+  </Card>
+</CardGroup>
+
+## Testing Reduced Motion
+
+To test reduced motion in Chrome DevTools:
+
+<Steps>
+  <Step title="Open DevTools">
+    Press F12 or Cmd+Option+I (Mac)
+  </Step>
+  
+  <Step title="Open Command Menu">
+    Press Cmd+Shift+P (Mac) or Ctrl+Shift+P (Windows)
+  </Step>
+  
+  <Step title="Type 'reduced'">
+    Search for "Show Rendering"
+  </Step>
+  
+  <Step title="Enable emulation">
+    Check "Emulate CSS prefers-reduced-motion: reduce"
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components" icon="shapes" href="/structure/components">
+    See how components use these animations
+  </Card>
+  
+  <Card title="Styling" icon="paintbrush" href="/structure/styling">
+    Learn about the CSS system that powers visual effects
+  </Card>
+</CardGroup>

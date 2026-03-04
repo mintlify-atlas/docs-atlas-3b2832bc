@@ -1,0 +1,285 @@
+---
+title: Content Customization
+description: Learn how to update event data, speakers, dates, and text content
+---
+
+## Overview
+
+The DEV WEEK 2025 site content is managed through data files and React components. This guide shows you how to update event schedules, speaker information, dates, and text content.
+
+## Event Schedule
+
+The event schedule is managed in `src/data/schedule.ts`.
+
+### Data Structure
+
+The schedule is exported as `diasEvento` array at `src/data/schedule.ts:4-127`:
+
+```typescript
+export const diasEvento = [
+  {
+    id: 1,
+    nombre: "Miércoles 10",
+    tema: "Inauguración y Gestión de TI",
+    fecha: "10 de diciembre",
+    hora: "10:50 - 13:00 hrs.",
+    descripcion: "Inicio oficial de la DEV WEEK 2025...",
+    actividades: [
+      {
+        titulo: "Recepción y registro de asistencia",
+        hora: "10:50 – 11:00",
+      },
+      {
+        titulo: "Ceremonia de apertura",
+        subtitulo: "Himno Nacional del Perú e Himno al Cusco",
+        hora: "11:10 – 11:21",
+      },
+      // More activities...
+    ],
+    destacado: false,
+  },
+  // More days...
+];
+```
+
+### Schedule Properties
+
+- **`id`**: Unique identifier (number)
+- **`nombre`**: Day name (e.g., "Miércoles 10")
+- **`tema`**: Day theme/title
+- **`fecha`**: Full date string (e.g., "10 de diciembre")
+- **`hora`**: Overall time range
+- **`descripcion`**: Day description
+- **`actividades`**: Array of activities with `titulo`, `subtitulo` (optional), and `hora`
+- **`destacado`**: Boolean to highlight the day (e.g., bootcamp days)
+
+### Updating the Schedule
+
+Edit `src/data/schedule.ts` to update event dates, times, or activities:
+
+```typescript
+export const diasEvento = [
+  {
+    id: 1,
+    nombre: "Monday 15",
+    tema: "Opening Day & Keynote",
+    fecha: "15th of January",
+    hora: "09:00 - 17:00 hrs.",
+    descripcion: "Kickoff of the event with opening ceremony and keynote speeches.",
+    actividades: [
+      {
+        titulo: "Registration",
+        hora: "09:00 – 09:30",
+      },
+      {
+        titulo: "Opening Keynote",
+        subtitulo: "Speaker Name - Title",
+        hora: "09:30 – 10:30",
+      },
+    ],
+    destacado: false,
+  },
+];
+```
+
+## Speaker Information
+
+Speakers are defined in `src/components/Speakers.tsx`.
+
+### Speaker Data Structure
+
+The `SPEAKERS_DATA` array is defined at `src/components/Speakers.tsx:17-78`:
+
+```typescript
+const SPEAKERS_DATA: Speaker[] = [
+  {
+    id: 1,
+    name: "Tec. Rodrigo Salazar",
+    role: "Especialista en Gestión de TI",
+    bio: "Especialista en gestión de tecnologías...",
+    topic: "Gestión de TI",
+    day: "Miércoles 10",
+    time: "12:10 - 12:50",
+    image: "/placeholder-speaker.jpg",
+  },
+  // More speakers...
+];
+```
+
+### Speaker Properties
+
+- **`id`**: Unique identifier (number)
+- **`name`**: Speaker's full name
+- **`role`**: Professional title or affiliation
+- **`bio`**: Brief biography (2-3 sentences)
+- **`topic`**: Topic/talk title
+- **`day`**: Event day (must match schedule day names)
+- **`time`**: Talk time
+- **`image`**: Path to speaker photo (in `/public` folder)
+
+### Adding/Updating Speakers
+
+Edit `src/components/Speakers.tsx` to add or modify speakers:
+
+```typescript
+const SPEAKERS_DATA: Speaker[] = [
+  {
+    id: 5,
+    name: "Jane Doe",
+    role: "Senior Software Engineer at Tech Corp",
+    bio: "Jane is a full-stack developer with 10 years of experience in web technologies. She specializes in React and Node.js.",
+    topic: "Modern Web Development",
+    day: "Monday 15",
+    time: "14:00 - 15:00",
+    image: "/jane-doe.jpg",  // Add photo to /public folder
+  },
+];
+```
+
+### Day Filter Options
+
+The day filter is defined at `src/components/Speakers.tsx:80`:
+
+```typescript
+const DAYS = ["Todos", "Miércoles 10", "Jueves 11", "Viernes 12"];
+```
+
+Update this array to match your event days (keep "Todos" as the first item for "All" filter).
+
+## Event Details (Hero Section)
+
+The main event information is displayed in `src/components/Hero.tsx`.
+
+### Event Dates & Times
+
+Update the event dates at `src/components/Hero.tsx:101` and time at `src/components/Hero.tsx:118`:
+
+```tsx
+<span className={styles.infoValue}>10 al 12 de diciembre</span>
+
+<span className={styles.infoValue}>11:00 a.m. – 1:00 p.m.</span>
+```
+
+### Event Location
+
+Update the venue at `src/components/Hero.tsx:122-124`:
+
+```tsx
+<span className={styles.infoValue}>
+  Auditórium del IESP Túpac Amaru
+</span>
+```
+
+### SEO H1 Title
+
+Update the main page title at `src/components/Hero.tsx:66-68`:
+
+```tsx
+<h1 className="sr-only">
+  DEV WEEK 2025 - Semana del Desarrollo del IESP Túpac Amaru Cusco
+</h1>
+```
+
+This is hidden visually but important for SEO and screen readers.
+
+## About Section
+
+The "What is DEV WEEK?" section is in `src/components/About.tsx`.
+
+### Event Description
+
+Update the description at `src/components/About.tsx:74-83`:
+
+```tsx
+<p className={styles.aboutDescription}>
+  DEV WEEK es la Semana del Desarrollo 2025, un evento anual
+  organizado por estudiantes del VI ciclo de
+  <span style={{ fontWeight: 600, color: "var(--morado)" }}>
+    {" "}
+    Desarrollo de Sistemas de Información
+  </span>
+  . Un evento diseñado para inspirar, educar y conectar a la comunidad
+  tecnológica del Cusco.
+</p>
+```
+
+### Feature Cards
+
+The feature cards are defined at `src/components/About.tsx:6-31`:
+
+```typescript
+const features = [
+  {
+    icon: <Code2 size={48} className={styles.aboutIcon} />,
+    title: "Innovación Tecnológica",
+    description: "Explora las últimas tendencias en desarrollo de software...",
+  },
+  // More features...
+];
+```
+
+Add, remove, or modify features to highlight different aspects of your event.
+
+## HTML Meta Tags
+
+Update SEO and social media metadata in `index.html`:
+
+### Page Title (Line 26-28)
+
+```html
+<title>
+  DEV WEEK 2025 - IESP Túpac Amaru | Evento Tecnológico 10-12 Diciembre
+</title>
+```
+
+### Meta Description (Line 29-32)
+
+```html
+<meta
+  name="description"
+  content="DEV WEEK 2025: Bootcamp Ciberseguridad OWASP + Gestión TI. 10-12 diciembre, IESP Túpac Amaru Cusco. Evento presencial y online gratis."
+/>
+```
+
+### Keywords (Line 34-36)
+
+```html
+<meta
+  name="keywords"
+  content="DEV WEEK, IESP Túpac Amaru, Desarrollo Sistemas Información, OWASP Cusco, ciberseguridad..."
+/>
+```
+
+### Canonical URL (Line 38)
+
+```html
+<link rel="canonical" href="https://semanainformatica2025.expandeya.com/" />
+```
+
+### Open Graph Tags (Lines 41-57)
+
+Update for social media sharing:
+
+```html
+<meta property="og:title" content="DEV WEEK 2025 - Semana del Desarrollo" />
+<meta property="og:description" content="Únete al evento tecnológico de Cusco..." />
+<meta property="og:image" content="https://semanainformatica2025.expandeya.com/og-image.jpg" />
+```
+
+### Structured Data (Lines 74-125)
+
+Update the JSON-LD schema for better SEO:
+
+```json
+{
+  "@type": "Event",
+  "name": "DEV WEEK 2025 - Semana del Desarrollo",
+  "startDate": "2025-12-10T11:00:00-05:00",
+  "endDate": "2025-12-12T13:00:00-05:00",
+  // Update dates, location, organizer info, etc.
+}
+```
+
+## Countdown Timer
+
+The countdown timer automatically calculates based on the target date. To update it, you'll need to modify the countdown logic in `src/components/CountdownClock.tsx` (check the component file for the target date configuration).

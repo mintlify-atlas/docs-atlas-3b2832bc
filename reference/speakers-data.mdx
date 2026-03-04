@@ -1,0 +1,196 @@
+---
+title: "Speakers Data Structure"
+description: "Reference documentation for the SPEAKERS_DATA array and Speaker interface in DEV WEEK 2025"
+---
+
+## Overview
+
+The speakers data for DEV WEEK 2025 is stored in `src/components/Speakers.tsx` and defined as the `SPEAKERS_DATA` constant. This array contains information about all speakers, their roles, topics, and schedule.
+
+## Data Location
+
+**File**: `src/components/Speakers.tsx`
+
+**Constant**: `SPEAKERS_DATA`
+
+## Type Definition
+
+### Speaker Interface
+
+```typescript
+interface Speaker {
+  id: number;
+  name: string;
+  role: string;
+  bio: string;
+  topic: string;
+  day: string;
+  time: string;
+  image: string;
+}
+```
+
+## Field Descriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `number` | Unique identifier for the speaker |
+| `name` | `string` | Full name of the speaker |
+| `role` | `string` | Professional role or affiliation |
+| `bio` | `string` | Biography and expertise description |
+| `topic` | `string` | Subject or topic the speaker will present |
+| `day` | `string` | Day of presentation (e.g., "Miércoles 10", "Jueves 11", "Viernes 12") |
+| `time` | `string` | Time slot for the presentation (e.g., "12:10 - 12:50") |
+| `image` | `string` | Path to speaker's profile image |
+
+## Data Structure Example
+
+Here are complete examples from the actual codebase:
+
+### IT Management Specialist
+
+```typescript
+{
+  id: 1,
+  name: "Tec. Rodrigo Salazar",
+  role: "Especialista en Gestión de TI",
+  bio: "Especialista en gestión de tecnologías de la información, administración de recursos tecnológicos, procesos de TI y adopción de soluciones organizacionales. Enfocado en la optimización operativa y gestión de servicios tecnológicos.",
+  topic: "Gestión de TI",
+  day: "Miércoles 10",
+  time: "12:10 - 12:50",
+  image: "/placeholder-speaker.jpg",
+}
+```
+
+### Cybersecurity Expert (OWASP)
+
+```typescript
+{
+  id: 2,
+  name: "Alejandro Miguel Choqueluque García",
+  role: "OWASP Cusco - Ciberseguridad",
+  bio: "Miembro de OWASP Cusco, capítulo local de la Fundación OWASP dedicado a mejorar la seguridad del software en la región. Especialista en ciberseguridad y desarrollo seguro.",
+  topic: "Bootcamp - Ciberseguridad",
+  day: "Jueves 11",
+  time: "11:00 - 16:00",
+  image: "/placeholder-speaker.jpg",
+}
+```
+
+### Student Presenter
+
+```typescript
+{
+  id: 5,
+  name: "Dante Srtdhara Quiliche Recharte",
+  role: "Estudiante del 4to Semestre - DSI",
+  bio: "Estudiante del cuarto semestre de la carrera Desarrollo de Sistemas de Información del IESP Túpac Amaru. Participante activo en proyectos académicos y presentaciones técnicas.",
+  topic: "Ponencia Académica",
+  day: "Miércoles 10",
+  time: "11:30 - 12:10",
+  image: "/placeholder-speaker.jpg",
+}
+```
+
+## Complete Speakers List
+
+DEV WEEK 2025 features 6 speakers:
+
+### Miércoles 10 de Diciembre
+1. **Tec. Rodrigo Salazar** - Gestión de TI
+2. **Dante Srtdhara Quiliche Recharte** - Ponencia Académica (Student)
+3. **Moises Rimachi Cusi** - Ponencia Académica (Student)
+
+### Jueves 11 de Diciembre (OWASP Bootcamp Day 1)
+1. **Alejandro Miguel Choqueluque García** - OWASP Cusco
+2. **Everth Juvenal Gallegos Puma** - OWASP Cusco
+
+### Viernes 12 de Diciembre (OWASP Bootcamp Day 2)
+1. **Jim Cardenas Cruz** - OWASP Cusco
+
+## Days Filter Constant
+
+The component also defines a `DAYS` constant used for filtering:
+
+```typescript
+const DAYS = ["Todos", "Miércoles 10", "Jueves 11", "Viernes 12"];
+```
+
+This constant is used to create filter buttons in the UI.
+
+## Usage Example
+
+### Accessing Speaker Data
+
+```typescript
+import { SPEAKERS_DATA, type Speaker } from './Speakers';
+
+// Get all speakers
+const allSpeakers: Speaker[] = SPEAKERS_DATA;
+
+// Get speakers for a specific day
+const wednesdaySpeakers = SPEAKERS_DATA.filter(
+  speaker => speaker.day === "Miércoles 10"
+);
+
+// Get OWASP speakers
+const owaspSpeakers = SPEAKERS_DATA.filter(
+  speaker => speaker.role.includes("OWASP")
+);
+
+// Search speakers by name or topic
+const searchSpeakers = (term: string) => {
+  return SPEAKERS_DATA.filter(
+    speaker =>
+      speaker.name.toLowerCase().includes(term.toLowerCase()) ||
+      speaker.topic.toLowerCase().includes(term.toLowerCase()) ||
+      speaker.role.toLowerCase().includes(term.toLowerCase())
+  );
+};
+```
+
+### Filtering Logic (From Component)
+
+```typescript
+const [selectedDay, setSelectedDay] = useState("Todos");
+const [searchTerm, setSearchTerm] = useState("");
+
+const filteredSpeakers = SPEAKERS_DATA.filter((speaker) => {
+  const matchesDay = selectedDay === "Todos" || speaker.day === selectedDay;
+  const matchesSearch =
+    speaker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    speaker.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    speaker.role.toLowerCase().includes(searchTerm.toLowerCase());
+  return matchesDay && matchesSearch;
+});
+```
+
+## Speaker Categories
+
+### By Role Type
+
+1. **Industry Professionals**
+   - Tec. Rodrigo Salazar (IT Management)
+
+2. **OWASP Cusco Members**
+   - Alejandro Miguel Choqueluque García
+   - Everth Juvenal Gallegos Puma
+   - Jim Cardenas Cruz
+
+3. **Student Presenters**
+   - Dante Srtdhara Quiliche Recharte
+   - Moises Rimachi Cusi
+
+### By Topic
+
+- **Gestión de TI**: 1 speaker
+- **Bootcamp - Ciberseguridad**: 3 speakers
+- **Ponencia Académica**: 2 speakers
+
+## Notes
+
+- All speaker images currently use placeholder path `/placeholder-speaker.jpg`
+- OWASP Cusco is the local chapter of the OWASP Foundation focused on software security
+- Student presenters are from the 4th semester of the Information Systems Development program at IESP Túpac Amaru
+- The component includes search and filter functionality for speakers
+- Speaker initials are displayed when images are not available (extracted from name)

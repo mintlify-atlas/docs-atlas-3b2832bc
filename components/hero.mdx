@@ -1,0 +1,193 @@
+---
+title: Hero Component
+description: Main hero section with countdown, event details, and animated binary rain background
+---
+
+# Hero Component
+
+The Hero component serves as the landing section of the DEV WEEK 2025 website. It features an animated binary rain background, event logos, countdown timer, event information, and call-to-action buttons.
+
+## Overview
+
+The Hero component creates an immersive first impression with:
+- **Binary rain animation** - Cascading columns of 0s and 1s for a tech aesthetic
+- **Event branding** - Displays both the 50th anniversary logo and DEV WEEK logo
+- **Countdown clock** - Real-time countdown to the event start
+- **Event details** - Date, time, and location information with icons
+- **CTA buttons** - Navigation to schedule and speakers sections
+
+## Props
+
+The Hero component does not accept any props. It's a self-contained section component.
+
+## File Location
+
+```
+~/workspace/source/src/components/Hero.tsx
+~/workspace/source/src/components/Hero.module.css
+```
+
+## Key Features
+
+### 1. Binary Rain Animation
+
+The component dynamically generates an animated background of falling binary digits:
+
+```typescript
+// Creates 15 columns of binary code
+const numColumns = 15;
+for (let i = 0; i < numColumns; i++) {
+  const column = document.createElement("div");
+  column.className = styles.binaryColumn;
+  column.style.left = `${(i / numColumns) * 100}%`;
+  
+  // Random animation duration (30-45 seconds)
+  const duration = Math.random() * 15 + 30;
+  column.style.animationDuration = `${duration}s`;
+  
+  // Each column contains 40-50 binary digits
+  const numDigits = Math.floor(Math.random() * 11) + 40;
+  // ...
+}
+```
+
+**Performance Optimization**: Reduced from 25 to 15 columns and from 60-90 to 40-50 digits per column for better performance.
+
+### 2. Staggered Entrance Animations
+
+Elements fade in with a staggered effect using the `enterStagger` utility:
+
+```typescript
+const elements = [titleRef.current, subtitleRef.current, ctaRef.current];
+enterStagger(elements.filter(Boolean), 100);
+```
+
+### 3. Event Information Display
+
+Displays key event details with Lucide React icons:
+
+```typescript
+<div className={styles.eventInfo}>
+  <div className={styles.infoBox}>
+    <Calendar size={22} className={styles.infoIcon} />
+    <span className={styles.infoValue}>10 al 12 de diciembre</span>
+  </div>
+  <div className={styles.infoBox}>
+    <Clock />
+    <span className={styles.infoValue}>11:00 a.m. – 1:00 p.m.</span>
+  </div>
+  <div className={styles.infoBox}>
+    <MapPin size={22} className={styles.infoIcon} />
+    <span className={styles.infoValue}>Auditórium del IESP Túpac Amaru</span>
+  </div>
+</div>
+```
+
+### 4. Smooth Scroll Navigation
+
+CTA buttons use smooth scrolling to navigate to other sections:
+
+```typescript
+<button
+  onClick={() => {
+    const el = document.getElementById("cronograma");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  }}
+  className={styles.btnSecondary}
+>
+  Ver Cronograma
+</button>
+```
+
+## Component Structure
+
+```tsx
+<section className={styles.hero}>
+  {/* SEO: Hidden H1 for semantic HTML */}
+  <h1 className="sr-only">DEV WEEK 2025 - Semana del Desarrollo...</h1>
+  
+  {/* Binary rain background */}
+  <div ref={binaryRainRef} className={styles.binaryRain}></div>
+  
+  <div className={styles.container}>
+    <div className={styles.content}>
+      {/* Logos with sparkle decorations */}
+      <div className={styles.logoContainer}>...</div>
+      
+      {/* Countdown clock and event details */}
+      <div className={styles.eventDetailsWrapper}>
+        <CountdownClock />
+        <div className={styles.eventInfo}>...</div>
+      </div>
+      
+      {/* CTA buttons */}
+      <div className={styles.ctaGroup}>...</div>
+    </div>
+  </div>
+</section>
+```
+
+## Dependencies
+
+### External Packages
+- `lucide-react` - For Calendar, MapPin icons
+- `react` - useEffect, useRef hooks
+
+### Internal Utilities
+- `../utils/animations` - enterStagger function for staggered animations
+- `./CountdownClock` - Nested countdown timer component
+
+### Assets
+- `/logo-50-años.png` - 50th anniversary logo
+- `/logo-DEV-WEEK-blanco.png` - Main DEV WEEK logo
+
+## Usage Example
+
+```tsx
+import Hero from './components/Hero';
+
+function App() {
+  return (
+    <main>
+      <Hero />
+      {/* Other sections */}
+    </main>
+  );
+}
+```
+
+## Accessibility Features
+
+- **Semantic HTML**: Hidden `<h1>` tag for screen readers
+- **ARIA labels**: All interactive buttons have `aria-label` attributes
+- **Focus management**: Proper focus indicators on interactive elements
+- **Alt text**: Descriptive alt text for all images
+
+## CSS Module
+
+The component uses CSS Modules (`Hero.module.css`) for scoped styling. Key classes include:
+- `.hero` - Main section container
+- `.binaryRain` - Background animation container
+- `.binaryColumn` - Individual falling columns
+- `.binaryDigit` - Individual 0/1 characters
+- `.logoContainer` - Logo wrapper with sparkles
+- `.eventInfo` - Event details grid
+- `.ctaGroup` - Call-to-action button container
+
+## Cleanup
+
+The component properly cleans up the binary rain animation on unmount:
+
+```typescript
+return () => {
+  if (binaryRainRef.current) {
+    binaryRainRef.current.innerHTML = "";
+  }
+};
+```
+
+## Related Components
+
+- CountdownClock - Nested component that displays real-time countdown (part of Hero)
+- [Schedule](/components/schedule) - Target of "Ver Cronograma" button
+- [Speakers](/components/speakers) - Target of "Conocer Ponentes" button

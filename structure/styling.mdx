@@ -1,0 +1,571 @@
+---
+title: 'Styling System'
+description: 'CSS Modules, design tokens, Tailwind integration, and responsive design patterns'
+icon: 'paintbrush'
+---
+
+## Styling Architecture
+
+DEV WEEK 2025 uses a hybrid styling approach combining:
+
+<CardGroup cols={3}>
+  <Card title="CSS Modules" icon="file-code">
+    Component-scoped styles for isolation
+  </Card>
+  
+  <Card title="CSS Variables" icon="palette">
+    Design tokens for consistency
+  </Card>
+  
+  <Card title="Tailwind CSS" icon="wind">
+    Utility classes for rapid development
+  </Card>
+</CardGroup>
+
+## Global Styles (index.css)
+
+The `src/index.css` file defines global styles, CSS variables, and imports Tailwind.
+
+### File Structure
+
+```css title="src/index.css"
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* CSS Variables */
+}
+
+/* Global resets and base styles */
+```
+
+### Design Tokens
+
+All design tokens are defined as CSS custom properties in `:root`:
+
+<Tabs>
+  <Tab title="Colors">
+    ```css title="src/index.css"
+    :root {
+      /* Brand Colors */
+      --morado: #61398c;           /* Primary purple */
+      --morado_claro: #8b5fbf;     /* Light purple */
+      --dorado: #fbbc30;           /* Gold accent */
+      
+      /* Neutrals */
+      --plomo: #535255;            /* Dark gray */
+      --blanco: #ffffff;           /* White */
+      --negro: #000000;            /* Black */
+      --gris-1: #f5f5f5;           /* Light gray */
+    }
+    ```
+    
+    <Info>
+      **Primary brand color** is `--morado` (purple), used throughout the site for headings, buttons, and accents.
+    </Info>
+  </Tab>
+  
+  <Tab title="Typography">
+    ```css title="src/index.css"
+    :root {
+      /* Font Families */
+      --font-heading: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--plomo);
+      line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      color: var(--negro);
+      line-height: 1.2;
+      font-weight: 700;
+    }
+    ```
+    
+    <Tip>
+      **Montserrat** is used for headings (bold, impactful), while **Inter** is used for body text (readable, clean).
+    </Tip>
+  </Tab>
+  
+  <Tab title="Shadows">
+    ```css title="src/index.css"
+    :root {
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+    ```
+    
+    Use these for consistent depth across cards and elevated elements.
+  </Tab>
+  
+  <Tab title="Border Radius">
+    ```css title="src/index.css"
+    :root {
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+    ```
+    
+    Consistent rounded corners across the design system.
+  </Tab>
+  
+  <Tab title="Transitions">
+    ```css title="src/index.css"
+    :root {
+      --transition-fast: 200ms ease;
+      --transition-base: 300ms ease;
+      --transition-slow: 500ms ease;
+    }
+
+    button {
+      transition: all var(--transition-base);
+    }
+
+    a {
+      transition: color var(--transition-fast);
+    }
+    ```
+    
+    Standardized timing for smooth interactions.
+  </Tab>
+</Tabs>
+
+## CSS Modules
+
+Every component has its own CSS Module file for scoped styles.
+
+### File Naming Convention
+
+```
+Component.tsx → Component.module.css
+```
+
+Example:
+```
+Hero.tsx → Hero.module.css
+Schedule.tsx → Schedule.module.css
+```
+
+### Usage Pattern
+
+```typescript title="src/components/Hero.tsx"
+import styles from "./Hero.module.css";
+
+const Hero = () => {
+  return (
+    <section className={styles.hero}>
+      <div className={styles.container}>
+        <h2 className={styles.title}>DEV WEEK 2025</h2>
+      </div>
+    </section>
+  );
+};
+```
+
+```css title="src/components/Hero.module.css"
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--morado) 0%, #4a2970 100%);
+  color: var(--blanco);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--dorado);
+}
+```
+
+<Info>
+  CSS Modules automatically scope class names to prevent conflicts. `.hero` becomes `.Hero_hero__abc123` at build time.
+</Info>
+
+### Example: Hero.module.css
+
+The Hero component demonstrates advanced CSS techniques:
+
+```css title="src/components/Hero.module.css"
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--morado) 0%, #4a2970 100%);
+  color: var(--blanco);
+  padding: 2rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Binary rain animation container */
+.binaryRain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.binaryColumn {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: "Courier New", monospace;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--morado_claro);
+  text-shadow: 0 0 8px rgba(139, 95, 191, 0.4);
+  opacity: 0.7;
+  animation: binaryFall linear infinite;
+  will-change: transform;
+}
+
+@keyframes binaryFall {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.binaryDigit {
+  animation: binaryBlink 2s ease-in-out infinite;
+}
+
+@keyframes binaryBlink {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+```
+
+**Key Features:**
+- Uses CSS variables for colors (`var(--morado)`, `var(--morado_claro)`)
+- Custom keyframe animations (`binaryFall`, `binaryBlink`)
+- Performance optimization with `will-change: transform`
+- Layering with `z-index` and `position: absolute`
+
+## Responsive Design
+
+The site uses mobile-first responsive design with CSS media queries.
+
+### Breakpoints
+
+```css
+/* Mobile first - base styles */
+.container {
+  padding: 1rem;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .container {
+    padding: 2rem;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .container {
+    padding: 3rem;
+    max-width: 1200px;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+```
+
+### Example: Schedule.module.css Grid
+
+```css title="src/components/Schedule.module.css"
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+```
+
+<Steps>
+  <Step title="Mobile (default)">
+    Single column layout, 1.5rem gap
+  </Step>
+  
+  <Step title="Tablet (768px+)">
+    Two columns, same gap
+  </Step>
+  
+  <Step title="Desktop (1024px+)">
+    Three columns, 2rem gap
+  </Step>
+</Steps>
+
+## Tailwind CSS Integration
+
+Tailwind is imported in `index.css` and available throughout the app:
+
+```css title="src/index.css"
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+### Usage Example
+
+```typescript
+<div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
+  <h3 className="text-xl font-bold text-gray-800">Title</h3>
+  <button className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+    Click Me
+  </button>
+</div>
+```
+
+<Warning>
+  While Tailwind utilities are available, most styling is done through CSS Modules for better component encapsulation and maintainability.
+</Warning>
+
+## Accessibility Styles
+
+### Skip Link
+
+Hidden until focused, allowing keyboard users to skip navigation:
+
+```css title="src/index.css"
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--morado);
+  color: var(--blanco);
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 10000;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid var(--dorado);
+  outline-offset: 2px;
+}
+```
+
+### Screen Reader Only
+
+Visually hidden but accessible to screen readers:
+
+```css title="src/index.css"
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+```
+
+### Focus Styles
+
+```css title="src/index.css"
+button:focus-visible {
+  outline: 2px solid var(--morado);
+  outline-offset: 2px;
+}
+```
+
+## Reduced Motion Support
+
+Respects user's motion preferences:
+
+```css title="src/index.css"
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+<Info>
+  Users who have enabled "reduced motion" in their OS settings will see instant transitions instead of animations, improving accessibility for users with vestibular disorders.
+</Info>
+
+## Common Patterns
+
+### Card Style
+
+```css
+.card {
+  background: var(--blanco);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+```
+
+### Button Style
+
+```css
+.button {
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--morado);
+  color: var(--blanco);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.button:hover {
+  background: var(--morado_claro);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--dorado);
+  outline-offset: 2px;
+}
+```
+
+### Container/Layout
+
+```css
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 0 3rem;
+  }
+}
+```
+
+## Using CSS Variables
+
+### In CSS Modules
+
+```css
+.element {
+  color: var(--morado);
+  background: var(--gris-1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+```
+
+### In Inline Styles
+
+```typescript
+<div style={{ 
+  color: 'var(--morado)', 
+  backgroundColor: 'var(--gris-1)' 
+}}>
+  Content
+</div>
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use CSS Variables for colors" icon="palette">
+    Always use design tokens like `var(--morado)` instead of hardcoded hex values for consistency.
+  </Accordion>
+  
+  <Accordion title="Scope styles with CSS Modules" icon="shield">
+    Keep component styles in `.module.css` files to prevent global style conflicts.
+  </Accordion>
+  
+  <Accordion title="Mobile-first responsive design" icon="mobile">
+    Write base styles for mobile, then add `@media` queries for larger screens.
+  </Accordion>
+  
+  <Accordion title="Use semantic class names" icon="tag">
+    Name classes based on purpose (`.hero`, `.card`) not appearance (`.bigPurpleBox`).
+  </Accordion>
+  
+  <Accordion title="Leverage Tailwind for utilities" icon="wind">
+    Use Tailwind for quick layout utilities, but CSS Modules for component-specific styles.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Components" icon="shapes" href="/structure/components">
+    See how components use these styles
+  </Card>
+  
+  <Card title="Animations" icon="sparkles" href="/structure/animations">
+    Learn about the animation system
+  </Card>
+</CardGroup>

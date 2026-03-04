@@ -1,0 +1,519 @@
+---
+title: 'Component Architecture'
+description: 'Complete guide to the React component structure, lazy loading pattern, and component organization'
+icon: 'shapes'
+---
+
+## Component Overview
+
+DEV WEEK 2025 uses a component-based architecture with React and TypeScript, implementing performance optimizations through lazy loading and code splitting.
+
+## Component List
+
+All components are located in `~/workspace/source/src/components/`:
+
+<CardGroup cols={2}>
+  <Card title="Hero" icon="star">
+    Landing section with event branding, countdown clock, and call-to-action buttons
+  </Card>
+  
+  <Card title="About" icon="circle-info">
+    Event description and key features with animated cards
+  </Card>
+  
+  <Card title="Schedule" icon="calendar">
+    Interactive schedule with day cards and detailed modal views
+  </Card>
+  
+  <Card title="Speakers" icon="microphone">
+    Speaker profiles with photos and bios
+  </Card>
+  
+  <Card title="LiveStreams" icon="video">
+    Live stream embeds and upcoming stream information
+  </Card>
+  
+  <Card title="Sponsors" icon="handshake">
+    Sponsor logos and information
+  </Card>
+  
+  <Card title="Bootcamp" icon="graduation-cap">
+    Bootcamp registration and information section
+  </Card>
+  
+  <Card title="RegistrationForm" icon="file-pen">
+    Event registration form with validation
+  </Card>
+  
+  <Card title="CountdownClock" icon="clock">
+    Real-time countdown to event start
+  </Card>
+  
+  <Card title="Footer" icon="rectangle-wide">
+    Site footer with links and social media
+  </Card>
+</CardGroup>
+
+## Lazy Loading Pattern
+
+The application implements React's lazy loading to improve initial page load performance.
+
+### Implementation in App.tsx
+
+```typescript title="src/App.tsx" {1,6-10}
+import { lazy, Suspense } from "react";
+import Hero from "./components/Hero";
+import Footer from "./components/Footer";
+
+// Lazy load all non-critical components for better performance
+const About = lazy(() => import("./components/About"));
+const Schedule = lazy(() => import("./components/Schedule"));
+const Speakers = lazy(() => import("./components/Speakers"));
+const LiveStreams = lazy(() => import("./components/LiveStreams"));
+const Sponsors = lazy(() => import("./components/Sponsors"));
+
+function App() {
+  return (
+    <>
+      {/* Accessibility: Skip to main content */}
+      <a href="#main-content" className="skip-link">
+        Saltar al contenido principal
+      </a>
+
+      <Hero />
+
+      <main id="main-content">
+        {/* Suspense boundary for each section to load independently */}
+        <Suspense fallback={<div style={{ minHeight: "200px" }} />}>
+          <About />
+        </Suspense>
+
+        <Suspense fallback={<div style={{ minHeight: "400px" }} />}>
+          <Schedule />
+        </Suspense>
+
+        <Suspense fallback={<div style={{ minHeight: "400px" }} />}>
+          <Speakers />
+        </Suspense>
+
+        <Suspense fallback={<div style={{ minHeight: "300px" }} />}>
+          <Sponsors />
+        </Suspense>
+      </main>
+
+      <Footer />
+    </>
+  );
+}
+```
+
+<Info>
+  **Critical components** (Hero, Footer) are loaded immediately, while **below-the-fold sections** (About, Schedule, Speakers, Sponsors) are lazy-loaded as separate chunks.
+</Info>
+
+### Benefits
+
+<Steps>
+  <Step title="Faster Initial Load">
+    Only Hero and Footer JavaScript is downloaded initially, reducing the initial bundle size
+  </Step>
+  
+  <Step title="Independent Loading">
+    Each Suspense boundary allows sections to load independently without blocking others
+  </Step>
+  
+  <Step title="Better User Experience">
+    Users see critical content immediately while non-critical content loads in the background
+  </Step>
+  
+  <Step title="Optimized Caching">
+    Separate chunks can be cached independently by the browser
+  </Step>
+</Steps>
+
+## Component Structure Pattern
+
+Most components follow this consistent pattern:
+
+```typescript
+import { useEffect, useRef, useState } from "react";
+import { Icon } from "lucide-react";
+import { animationFunction } from "../utils/animations";
+import styles from "./ComponentName.module.css";
+
+export default function ComponentName() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState();
+
+  useEffect(() => {
+    // Animation on intersection
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          animationFunction(/* ... */);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={sectionRef} id="section-id" className={styles.section}>
+      {/* Component content */}
+    </section>
+  );
+}
+```
+
+<Tip>
+  The **IntersectionObserver** pattern ensures animations only trigger when components enter the viewport, improving performance and user experience.
+</Tip>
+
+## Example Components
+
+### Hero Component
+
+The landing section with custom binary rain animation:
+
+```typescript title="src/components/Hero.tsx" {3,8-11,16}
+import { useEffect, useRef } from "react";
+import { Calendar, MapPin } from "lucide-react";
+import { enterStagger } from "../utils/animations";
+import CountdownClock from "./CountdownClock";
+import styles from "./Hero.module.css";
+
+const Hero = () => {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const binaryRainRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const elements = [titleRef.current, subtitleRef.current, ctaRef.current];
+
+    enterStagger(elements.filter(Boolean), 100);
+
+    // Binary rain animation - optimized with CSS animations
+    if (binaryRainRef.current) {
+      const container = binaryRainRef.current;
+      const numColumns = 15;
+
+      for (let i = 0; i < numColumns; i++) {
+        const column = document.createElement("div");
+        column.className = styles.binaryColumn;
+        column.style.left = `${(i / numColumns) * 100}%`;
+        
+        const duration = Math.random() * 15 + 30;
+        column.style.animationDuration = `${duration}s`;
+        
+        // Create binary digits...
+        container.appendChild(column);
+      }
+    }
+  }, []);
+
+  return (
+    <section className={styles.hero}>
+      <div ref={binaryRainRef} className={styles.binaryRain}></div>
+      {/* ... */}
+    </section>
+  );
+};
+```
+
+**Key Features:**
+- Custom binary rain background animation
+- Staggered entrance animations using anime.js
+- Embedded CountdownClock component
+- Smooth scroll navigation to other sections
+
+### Schedule Component
+
+Interactive schedule with modal details:
+
+```typescript title="src/components/Schedule.tsx" {10-11}
+import { useEffect, useRef, useState } from "react";
+import { Calendar, Clock } from "lucide-react";
+import { enterStagger } from "../utils/animations";
+import { diasEvento } from "../data/schedule";
+import { Dia, Actividad } from "../types";
+import styles from "./Schedule.module.css";
+
+export default function Schedule() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [selectedDay, setSelectedDay] = useState<Dia | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const cards = document.querySelectorAll(`.${styles.scheduleCard}`);
+            enterStagger(cards, 100);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  // Block scroll when modal is open
+  useEffect(() => {
+    if (selectedDay) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [selectedDay]);
+
+  return (
+    <section ref={sectionRef} id="cronograma" className={styles.section}>
+      {/* Day cards */}
+      <div className={styles.grid}>
+        {diasEvento.map((dia) => (
+          <div
+            key={dia.id}
+            onClick={() => setSelectedDay(dia)}
+            className={styles.scheduleCard}
+          >
+            {/* Card content */}
+          </div>
+        ))}
+      </div>
+      
+      {/* Modal for detailed schedule */}
+      {selectedDay && (
+        <div className={styles.modalOverlay}>
+          {/* Modal content */}
+        </div>
+      )}
+    </section>
+  );
+}
+```
+
+**Key Features:**
+- Loads data from `src/data/schedule.ts`
+- Modal overlay for detailed activity view
+- Manages body scroll when modal is open
+- Animated card entrance on scroll
+
+### About Component
+
+Features section with staggered card animations:
+
+```typescript title="src/components/About.tsx" {4,33}
+import { useEffect, useRef, useState } from "react";
+import { Code2, Users, Lightbulb, Rocket } from "lucide-react";
+import anime from "animejs";
+import styles from "./About.module.css";
+
+const features = [
+  {
+    icon: <Code2 size={48} className={styles.aboutIcon} />,
+    title: "Innovación Tecnológica",
+    description: "Explora las últimas tendencias en desarrollo de software"
+  },
+  // ... more features
+];
+
+export default function About() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            anime({
+              targets: `.${styles.aboutCard}`,
+              translateY: [50, 0],
+              opacity: [0, 1],
+              duration: 800,
+              delay: anime.stagger(150),
+              easing: "easeOutExpo",
+            });
+            setHasAnimated(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasAnimated]);
+
+  return (
+    <section ref={sectionRef} className={styles.aboutSection}>
+      <div className={styles.aboutGrid}>
+        {features.map((feature, index) => (
+          <div key={index} className={styles.aboutCard}>
+            {feature.icon}
+            <h3>{feature.title}</h3>
+            <p>{feature.description}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+```
+
+**Key Features:**
+- Uses anime.js directly for custom stagger animation
+- Prevents re-animation with `hasAnimated` state
+- Icons from lucide-react library
+
+## CSS Modules Integration
+
+Every component has a corresponding CSS Module file:
+
+```typescript
+import styles from "./Hero.module.css";
+
+// Usage:
+<div className={styles.hero}>
+  <h1 className={styles.title}>Title</h1>
+</div>
+```
+
+<Info>
+  CSS Modules provide **scoped styles** - class names are automatically unique, preventing style conflicts between components.
+</Info>
+
+See the [Styling Guide](/structure/styling) for more details on CSS Modules and design tokens.
+
+## Type Safety
+
+Components use TypeScript types from centralized locations:
+
+```typescript
+import { Dia, Actividad } from "../types";
+import { Stream, StreamWithStatus } from "../types/stream";
+```
+
+**Available Types:**
+
+<Tabs>
+  <Tab title="types.ts">
+    ```typescript title="src/types.ts"
+    export type Actividad = {
+      titulo: string;
+      hora: string;
+    };
+
+    export type Dia = {
+      id: number;
+      nombre: string;
+      tema: string;
+      fecha: string;
+      hora: string;
+      descripcion: string;
+      actividades: Actividad[];
+      destacado: boolean;
+    };
+    ```
+  </Tab>
+  
+  <Tab title="types/stream.ts">
+    ```typescript title="src/types/stream.ts"
+    export type StreamStatus = "live" | "upcoming" | "recorded" | "scheduled";
+    export type Platform = "youtube" | "twitch" | "facebook" | "other";
+
+    export interface Stream {
+      id: number;
+      title: string;
+      day: string;
+      date: string;
+      startTime: string;
+      endTime: string;
+      platform: Platform;
+      channelId?: string;
+      videoId?: string;
+      embedUrl?: string;
+      description?: string;
+    }
+
+    export interface StreamWithStatus extends Stream {
+      status: StreamStatus;
+      timeUntilStart?: number;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Accessibility Features
+
+Components implement accessibility best practices:
+
+```typescript title="src/App.tsx"
+{/* Skip to main content link */}
+<a href="#main-content" className="skip-link">
+  Saltar al contenido principal
+</a>
+
+<main id="main-content">
+  {/* Main content */}
+</main>
+```
+
+```typescript title="src/Hero.tsx"
+{/* SEO: Semantic H1 hidden visually but accessible */}
+<h1 className="sr-only">
+  DEV WEEK 2025 - Semana del Desarrollo del IESP Túpac Amaru Cusco
+</h1>
+```
+
+<Tip>
+  All interactive elements include proper `aria-label` attributes and keyboard navigation support.
+</Tip>
+
+## Performance Optimizations
+
+<AccordionGroup>
+  <Accordion title="Lazy Loading" icon="rocket">
+    Non-critical components are lazy-loaded to reduce initial bundle size
+  </Accordion>
+  
+  <Accordion title="Intersection Observer" icon="eye">
+    Animations only trigger when components enter viewport, saving CPU
+  </Accordion>
+  
+  <Accordion title="Animation Disconnection" icon="plug">
+    Observers are properly disconnected after animating to prevent memory leaks
+  </Accordion>
+  
+  <Accordion title="Reduced Motion Support" icon="universal-access">
+    Animations respect `prefers-reduced-motion` media query for accessibility
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Styling" icon="paintbrush" href="/structure/styling">
+    Learn about CSS Modules and design tokens
+  </Card>
+  
+  <Card title="Animations" icon="sparkles" href="/structure/animations">
+    Explore the anime.js animation system
+  </Card>
+</CardGroup>

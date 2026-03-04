@@ -1,0 +1,237 @@
+---
+title: About Component
+description: Event overview section with animated feature cards
+icon: info-circle
+---
+
+# About Component
+
+The About component provides an overview of the DEV WEEK event with a brief description and four key feature cards explaining what attendees can expect. It's the first content section after the hero.
+
+## Overview
+
+The About component displays:
+- **Event description** - Brief explanation of DEV WEEK 2025
+- **Feature cards** - Four main event highlights with icons
+- **Staggered animations** - Cards animate in sequence on scroll
+- **Institution reference** - Highlights the organizing program (Desarrollo de Sistemas de Información)
+
+## File Location
+
+```
+~/workspace/source/src/components/About.tsx
+~/workspace/source/src/components/About.module.css
+```
+
+## Usage
+
+The component is imported and rendered in `App.tsx` with lazy loading:
+
+```tsx
+// src/App.tsx
+const About = lazy(() => import("./components/About"));
+
+// Inside main content
+<Suspense fallback={<div style={{ minHeight: "200px" }} />}>
+  <About />
+</Suspense>
+```
+
+## Props
+
+The About component does not accept any props. It's a self-contained section component with hardcoded content.
+
+## Features
+
+### 1. Event Description
+
+The component displays a brief description of DEV WEEK with the organizing institution highlighted:
+
+```tsx
+<p className={styles.aboutDescription}>
+  DEV WEEK es la Semana del Desarrollo 2025, un evento anual
+  organizado por estudiantes del VI ciclo de
+  <span style={{ fontWeight: 600, color: "var(--morado)" }}>
+    {" "}
+    Desarrollo de Sistemas de Información
+  </span>
+  . Un evento diseñado para inspirar, educar y conectar a la comunidad
+  tecnológica del Cusco.
+</p>
+```
+
+### 2. Feature Cards
+
+Four feature cards are displayed in a grid layout:
+
+```tsx
+const features = [
+  {
+    icon: <Code2 size={48} className={styles.aboutIcon} />,
+    title: "Innovación Tecnológica",
+    description:
+      "Explora las últimas tendencias en desarrollo de software y herramientas modernas",
+  },
+  {
+    icon: <Users size={48} className={styles.aboutIcon} />,
+    title: "Networking",
+    description:
+      "Conecta con profesionales, expertos del sector y estudiantes apasionados por la tecnología",
+  },
+  {
+    icon: <Lightbulb size={48} className={styles.aboutIcon} />,
+    title: "Aprendizaje Práctico",
+    description:
+      "Workshops y bootcamps hands-on para desarrollar habilidades reales y aplicables",
+  },
+  {
+    icon: <Rocket size={48} className={styles.aboutIcon} />,
+    title: "Impulso Profesional",
+    description:
+      "Oportunidades laborales, mentoría y consejos para acelerar tu carrera tecnológica",
+  },
+];
+```
+
+Each card includes:
+- **Lucide React icon** (Code2, Users, Lightbulb, Rocket)
+- **Title** - Feature name
+- **Description** - Brief explanation of the benefit
+
+### 3. Scroll-Triggered Animation
+
+The component uses Intersection Observer with anime.js for entrance animations:
+
+```tsx
+// src/components/About.tsx:37-56
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          anime({
+            targets: `.${styles.aboutCard}`,
+            translateY: [50, 0],
+            opacity: [0, 1],
+            duration: 800,
+            delay: anime.stagger(150),
+            easing: "easeOutExpo",
+          });
+          setHasAnimated(true);
+          observer.disconnect(); // Performance: Disconnect after animating
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+
+  if (sectionRef.current) {
+    observer.observe(sectionRef.current);
+  }
+
+  return () => observer.disconnect();
+}, [hasAnimated]);
+```
+
+**Animation properties:**
+- `translateY: [50, 0]` - Cards slide up from 50px below
+- `opacity: [0, 1]` - Fade in effect
+- `duration: 800` - 800ms animation
+- `delay: anime.stagger(150)` - Each card delayed by 150ms
+- `easing: "easeOutExpo"` - Smooth exponential easing
+- `threshold: 0.2` - Triggers when 20% of section is visible
+
+### 4. One-Time Animation
+
+The component uses state to prevent re-animation on scroll:
+
+```tsx
+const [hasAnimated, setHasAnimated] = useState(false);
+
+// Animation only runs if !hasAnimated
+if (entry.isIntersecting && !hasAnimated) {
+  // ... animate
+  setHasAnimated(true);
+  observer.disconnect();
+}
+```
+
+## Component Structure
+
+```tsx
+<section id="about" className={styles.aboutSection}>
+  <div className={styles.aboutContainer}>
+    {/* Header with title and description */}
+    <div className={styles.aboutHeader}>
+      <div className={styles.titleWrapper}>
+        <h2>¿Qué es DEV WEEK?</h2>
+        <Laptop size={28} />
+      </div>
+      <div className={styles.aboutDivider}></div>
+      <p className={styles.aboutDescription}>...</p>
+    </div>
+
+    {/* Feature cards grid */}
+    <div className={styles.aboutGrid}>
+      {features.map((feature, index) => (
+        <div key={index} className={styles.aboutCard}>
+          {feature.icon}
+          <h3>{feature.title}</h3>
+          <p>{feature.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+```
+
+## Dependencies
+
+- **React** - useState, useEffect, useRef hooks
+- **Lucide React** - Code2, Users, Lightbulb, Rocket, Laptop icons
+- **anime.js** - Direct import for staggered card animations
+- **CSS Modules** - About.module.css for component styling
+
+## Styling
+
+The component uses:
+- **CSS Modules** for scoped styles (About.module.css)
+- **CSS variables** for colors (var(--morado) for brand color)
+- **Grid layout** for responsive feature cards
+- **Transform and opacity** for animation states
+
+## Customization
+
+To customize the About section:
+
+1. **Edit event description** - Update the text in the aboutDescription paragraph (line 74-83)
+2. **Modify features** - Edit the features array (lines 6-31):
+   - Change icons by importing different Lucide icons
+   - Update titles and descriptions
+   - Add or remove features (component will adapt grid layout)
+3. **Adjust animations** - Modify anime.js parameters in the useEffect (lines 42-49):
+   - Change `duration` for faster/slower animation
+   - Adjust `delay: anime.stagger()` for card timing
+   - Modify `translateY` values for different entrance effect
+4. **Update section ID** - Change `id="about"` if linking from other components
+
+## Accessibility
+
+- **Semantic HTML** - Uses `<section>`, `<h2>`, `<h3>` for proper hierarchy
+- **Section ID** - `id="about"` allows direct navigation/linking
+- **Icon decorations** - Icons are purely visual (CSS class handles styling)
+- **Readable text** - Feature descriptions provide clear information
+- **Animation respect** - Works with prefers-reduced-motion (anime.js handles this automatically)
+
+## Related Components
+
+- [Hero](/components/hero) - The preceding component with event overview
+- [Schedule](/components/schedule) - The following component with event timeline
+- [Sponsors](/components/sponsors) - Also displays institutional information
+
+## Performance Notes
+
+- **Lazy loaded** - Component is loaded on-demand via React.lazy()
+- **Observer disconnects** - IntersectionObserver disconnects after animation to free resources
+- **One-time animation** - hasAnimated state prevents repeated animations
+- **Threshold optimization** - Only triggers when 20% visible (not too early)

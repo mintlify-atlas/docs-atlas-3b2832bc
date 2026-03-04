@@ -1,0 +1,299 @@
+---
+title: Bootcamp Component
+description: Optional intensive bootcamp promotion banner with registration CTA
+icon: graduation-cap
+---
+
+# Bootcamp Component
+
+The Bootcamp component is an optional promotional banner for highlighting intensive training sessions during the event. It includes stats, features, requirements, and a registration CTA button.
+
+<Note>
+This component is currently **commented out** in `App.tsx` (line 32) but remains available in the codebase for future use.
+</Note>
+
+## Overview
+
+The Bootcamp component provides:
+- **Promotional banner** - Eye-catching banner with bootcamp details
+- **Stats display** - Duration and available slots
+- **Feature list** - Four key bootcamp benefits with checkmarks
+- **Requirements section** - Prerequisites for participation
+- **Registration CTA** - Button to trigger registration flow
+- **Slide-in animation** - Banner enters from left on mount
+
+## File Location
+
+```
+~/workspace/source/src/components/Bootcamp.tsx
+~/workspace/source/src/components/Bootcamp.module.css
+```
+
+## Props
+
+<ParamField path="onRegister" type="() => void" required>
+  Callback function triggered when the "Registrarme al Bootcamp" button is clicked. Should scroll to or open the registration form.
+</ParamField>
+
+## Usage
+
+To enable the Bootcamp component, uncomment it in `App.tsx`:
+
+```tsx
+// src/App.tsx:32
+import { lazy, Suspense } from "react";
+
+const Bootcamp = lazy(() => import("./components/Bootcamp"));
+
+// Inside App component
+const registerRef = useRef<HTMLDivElement>(null);
+
+const scrollToRegister = () => {
+  if (registerRef.current) {
+    registerRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+};
+
+// In JSX
+<Suspense fallback={<div style={{ minHeight: "400px" }} />}>
+  <Bootcamp onRegister={scrollToRegister} />
+</Suspense>
+```
+
+## Features
+
+### 1. Promotional Banner
+
+The banner displays bootcamp details with a badge and decorative graphics:
+
+```tsx
+<div className={styles.banner}>
+  <div className={styles.bannerContent}>
+    <div className={styles.badgeContainer}>
+      <Award className={styles.badgeIcon} size={28} />
+      <span className={styles.badgeText}>Miércoles 3 de Diciembre</span>
+    </div>
+
+    <h2 className={styles.title}>Bootcamp Intensivo</h2>
+    <p className={styles.subtitle}>
+      Día central del evento con experiencia de aprendizaje práctica e intensiva
+    </p>
+  </div>
+</div>
+```
+
+### 2. Stats Display
+
+Two stats cards show duration and availability:
+
+```tsx
+<div className={styles.stats}>
+  <div className={styles.stat}>
+    <Clock size={24} />
+    <div>
+      <span className={styles.statValue}>4 horas</span>
+      <span className={styles.statLabel}>de duración</span>
+    </div>
+  </div>
+  <div className={styles.stat}>
+    <Users size={24} />
+    <div>
+      <span className={styles.statValue}>{availableSlots}</span>
+      <span className={styles.statLabel}>cupos disponibles</span>
+    </div>
+  </div>
+</div>
+```
+
+The `availableSlots` is managed via state:
+
+```tsx
+const [availableSlots] = useState(45);
+```
+
+<Tip>
+You can replace this with a prop or fetch from an API to show real-time availability.
+</Tip>
+
+### 3. Feature List
+
+Four bootcamp benefits are displayed with checkmark icons:
+
+```tsx
+const features = [
+  {
+    title: "Sesiones Prácticas",
+    description: "Trabajo hands-on con tecnologías actuales y casos reales"
+  },
+  {
+    title: "Mentores Expertos",
+    description: "Guía personalizada de profesionales con experiencia en la industria"
+  },
+  {
+    title: "Certificado",
+    description: "Reconocimiento oficial de participación del ISTTA"
+  },
+  {
+    title: "Materiales Incluidos",
+    description: "Recursos digitales, templates y acceso a repositorio exclusivo"
+  }
+];
+```
+
+Each feature is rendered with a CheckCircle icon from Lucide React.
+
+### 4. Requirements Section
+
+Prerequisites are listed for attendees:
+
+```tsx
+<ul className={styles.requirementsList}>
+  <li>Laptop con software de desarrollo instalado</li>
+  <li>Conocimientos básicos de programación</li>
+  <li>Compromiso de asistencia completa (4 horas)</li>
+  <li>Inscripción previa (cupos limitados)</li>
+</ul>
+```
+
+### 5. Entrance Animations
+
+The component uses animation utilities on mount:
+
+```tsx
+// src/components/Bootcamp.tsx:10-19
+useEffect(() => {
+  if (bannerRef.current) {
+    slideInLeft(bannerRef.current, 800);
+  }
+
+  const features = document.querySelectorAll(`.${styles.feature}`);
+  if (features.length > 0) {
+    scaleIn(features, 600);
+  }
+}, []);
+```
+
+**Animations applied:**
+- `slideInLeft()` - Banner slides in from the left over 800ms
+- `scaleIn()` - Feature cards scale up over 600ms
+
+### 6. Registration CTA
+
+The main call-to-action button triggers the registration callback:
+
+```tsx
+<button onClick={onRegister} className={styles.ctaButton}>
+  Registrarme al Bootcamp
+</button>
+```
+
+## Component Structure
+
+```tsx
+<section className={styles.section} id="bootcamp">
+  <div className={styles.container}>
+    {/* Banner with title, stats, and CTA */}
+    <div ref={bannerRef} className={styles.banner}>
+      {/* Badge, title, subtitle, stats, CTA button */}
+    </div>
+
+    {/* Details section */}
+    <div className={styles.details}>
+      <h3>¿Qué incluye el Bootcamp?</h3>
+      
+      {/* Features list */}
+      <div className={styles.features}>
+        {/* 4 feature cards */}
+      </div>
+
+      {/* Requirements */}
+      <div className={styles.requirements}>
+        {/* Requirements list */}
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+## Dependencies
+
+- **React** - useState, useEffect, useRef hooks
+- **Lucide React** - Award, Users, Clock, CheckCircle icons
+- **Animation utilities** - slideInLeft, scaleIn from ../utils/animations
+- **CSS Modules** - Bootcamp.module.css for component styling
+
+## Customization
+
+To customize the Bootcamp section:
+
+1. **Update date** - Change the badge text (line 28): `"Miércoles 3 de Diciembre"`
+2. **Modify stats** - Edit duration or slots:
+   - Duration: Change `"4 horas"` (line 40)
+   - Slots: Update `useState(45)` (line 8)
+3. **Edit features** - Add/remove benefits or change descriptions (lines 68-106)
+4. **Update requirements** - Modify the prerequisites list (lines 111-116)
+5. **Change animations** - Adjust duration in `slideInLeft()` or `scaleIn()` calls
+
+## Styling
+
+The component uses:
+- **CSS Modules** for scoped styles
+- **CSS Grid** for layout
+- **Flexbox** for stats alignment
+- **Decorative graphics** - Circle and square shapes via CSS
+
+## When to Use
+
+Enable this component when:
+- The event includes an intensive training day
+- You want to highlight a special workshop
+- Registration has limited capacity
+- You need to communicate prerequisites
+
+## Accessibility
+
+- **Semantic HTML** - Uses `<section>`, headings, and lists properly
+- **Button role** - CTA is a proper `<button>` element
+- **Icon labels** - Icons paired with descriptive text
+- **Section ID** - `id="bootcamp"` allows direct linking
+
+## Related Components
+
+- [RegistrationForm](/components/registration-form) - Target of the onRegister callback
+- [Schedule](/components/schedule) - Shows the bootcamp in the event timeline
+- [Hero](/components/hero) - May include a CTA to scroll to bootcamp section
+
+## Integration Example
+
+Full integration with registration form:
+
+```tsx
+// App.tsx
+import { useRef } from 'react';
+
+function App() {
+  const registerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToRegister = () => {
+    if (registerRef.current) {
+      registerRef.current.scrollIntoView({ 
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  };
+
+  return (
+    <>
+      <Hero />
+      <About />
+      <Schedule />
+      <Bootcamp onRegister={scrollToRegister} />
+      
+      <div ref={registerRef}>
+        <RegistrationForm />
+      </div>
+    </>
+  );
+}
+```

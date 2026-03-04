@@ -44,12 +44,15 @@
             "group": "Components",
             "pages": [
               "components/hero",
+              "components/countdown-clock",
+              "components/about",
               "components/schedule",
               "components/speakers",
               "components/livestreams",
               "components/registration-form",
               "components/sponsors",
-              "components/footer"
+              "components/footer",
+              "components/bootcamp"
             ]
           },
           {
@@ -79,6 +82,12 @@
               "reference/schedule-data",
               "reference/speakers-data",
               "reference/types"
+            ]
+          },
+          {
+            "group": "Utilities",
+            "pages": [
+              "reference/stream-helpers"
             ]
           },
           {

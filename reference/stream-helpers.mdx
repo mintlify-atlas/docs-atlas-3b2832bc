@@ -1,0 +1,367 @@
+---
+title: Stream Helpers
+description: Utility functions for managing live stream status and embed URLs
+icon: broadcast-tower
+---
+
+# Stream Helpers
+
+The `streamHelpers` module provides utility functions for working with live streams in the LiveStreams component. It handles status detection, embed URL generation, and countdown formatting.
+
+## File Location
+
+```
+~/workspace/source/src/utils/streamHelpers.ts
+```
+
+## Functions
+
+### getStreamStatus
+
+Determines the current status of a stream based on date and time.
+
+```typescript
+export const getStreamStatus = (stream: Stream): StreamStatus
+```
+
+<ParamField path="stream" type="Stream">
+  The stream object containing date, startTime, endTime, videoId, and channelId
+</ParamField>
+
+**Returns:** `StreamStatus` - One of: `"live"`, `"upcoming"`, `"recorded"`, or `"scheduled"`
+
+**Status Logic:**
+
+1. **recorded** - Stream has ended and has a videoId (recording available)
+2. **live** - Current time is within stream window and has videoId or channelId
+3. **upcoming** - Stream date/time is in the future
+4. **scheduled** - Stream has passed but no video available (will be hidden)
+
+```typescript
+// src/utils/streamHelpers.ts:6-32
+export const getStreamStatus = (stream: Stream): StreamStatus => {
+  const now = new Date();
+  const streamDate = new Date(`${stream.date}T${stream.startTime}:00`);
+  const streamEndDate = new Date(`${stream.date}T${stream.endTime}:00`);
+
+  // Si tiene videoId y la fecha ya pasó, es grabación
+  if (stream.videoId && now > streamEndDate) {
+    return "recorded";
+  }
+
+  // Si está en el rango de tiempo Y tiene link, está en vivo
+  if (
+    now >= streamDate &&
+    now <= streamEndDate &&
+    (stream.videoId || stream.channelId)
+  ) {
+    return "live";
+  }
+
+  // Si la fecha es futura, es próximo
+  if (now < streamDate) {
+    return "upcoming";
+  }
+
+  // Si ya pasó pero sin video, es scheduled (para que se oculte)
+  return "scheduled";
+};
+```
+
+### getStreamWithStatus
+
+Enhances a stream object with calculated status and countdown information.
+
+```typescript
+export const getStreamWithStatus = (stream: Stream): StreamWithStatus
+```
+
+<ParamField path="stream" type="Stream">
+  The base stream object
+</ParamField>
+
+**Returns:** `StreamWithStatus` - Stream object with added `status` and `timeUntilStart` fields
+
+```typescript
+// src/utils/streamHelpers.ts:37-49
+export const getStreamWithStatus = (stream: Stream): StreamWithStatus => {
+  const status = getStreamStatus(stream);
+  const now = new Date();
+  const streamDate = new Date(`${stream.date}T${stream.startTime}:00`);
+  const timeUntilStart =
+    status === "upcoming" ? streamDate.getTime() - now.getTime() : undefined;
+
+  return {
+    ...stream,
+    status,
+    timeUntilStart,
+  };
+};
+```
+
+**Usage Example:**
+
+```typescript
+const stream = {
+  id: 1,
+  title: "Opening Keynote",
+  date: "2025-12-10",
+  startTime: "11:00",
+  endTime: "13:00",
+  platform: "youtube",
+  videoId: "abc123"
+};
+
+const enrichedStream = getStreamWithStatus(stream);
+// {
+//   ...stream,
+//   status: "upcoming",
+//   timeUntilStart: 86400000 // milliseconds until start
+// }
+```
+
+### getEmbedUrl
+
+Generates the appropriate embed URL based on stream platform and IDs.
+
+```typescript
+export const getEmbedUrl = (stream: Stream): string
+```
+
+<ParamField path="stream" type="Stream">
+  Stream object with platform, embedUrl, videoId, and/or channelId
+</ParamField>
+
+**Returns:** `string` - Embed URL for iframe, or empty string if unavailable
+
+**Platform Support:**
+
+| Platform | ID Type | URL Format |
+|----------|---------|------------|
+| YouTube (video) | videoId | `https://www.youtube.com/embed/{videoId}?autoplay=1` |
+| YouTube (live) | channelId | `https://www.youtube.com/embed/live_stream?channel={channelId}&autoplay=1` |
+| Twitch | channelId | `https://player.twitch.tv/?channel={channelId}&parent={hostname}` |
+| Facebook | videoId | `https://www.facebook.com/plugins/video.php?href=...&autoplay=true` |
+
+```typescript
+// src/utils/streamHelpers.ts:54-83
+export const getEmbedUrl = (stream: Stream): string => {
+  if (stream.embedUrl) {
+    return stream.embedUrl;
+  }
+
+  switch (stream.platform) {
+    case "youtube":
+      if (stream.videoId) {
+        return `https://www.youtube.com/embed/${stream.videoId}?autoplay=1`;
+      }
+      if (stream.channelId) {
+        return `https://www.youtube.com/embed/live_stream?channel=${stream.channelId}&autoplay=1`;
+      }
+      break;
+
+    case "twitch":
+      if (stream.channelId) {
+        return `https://player.twitch.tv/?channel=${stream.channelId}&parent=${window.location.hostname}`;
+      }
+      break;
+
+    case "facebook":
+      if (stream.videoId) {
+        return `https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/facebook/videos/${stream.videoId}/&autoplay=true`;
+      }
+      break;
+  }
+
+  return "";
+};
+```
+
+<Note>
+If `stream.embedUrl` is provided, it takes precedence over auto-generated URLs.
+</Note>
+
+### getTodayStream
+
+Finds the stream scheduled for the current date.
+
+```typescript
+export const getTodayStream = (streams: Stream[]): StreamWithStatus | null
+```
+
+<ParamField path="streams" type="Stream[]">
+  Array of all available streams
+</ParamField>
+
+**Returns:** `StreamWithStatus | null` - Today's stream with status, or null if none
+
+```typescript
+// src/utils/streamHelpers.ts:88-93
+export const getTodayStream = (streams: Stream[]): StreamWithStatus | null => {
+  const today = new Date().toISOString().split("T")[0];
+  const todayStream = streams.find((stream) => stream.date === today);
+
+  return todayStream ? getStreamWithStatus(todayStream) : null;
+};
+```
+
+**Usage Example:**
+
+```typescript
+const allStreams = [
+  { id: 1, date: "2025-12-10", ... },
+  { id: 2, date: "2025-12-11", ... },
+  { id: 3, date: "2025-12-12", ... }
+];
+
+const todayStream = getTodayStream(allStreams);
+// Returns the stream matching today's date, or null
+```
+
+### formatCountdown
+
+Converts milliseconds into hours, minutes, and seconds for countdown displays.
+
+```typescript
+export const formatCountdown = (milliseconds: number): { hours: number; minutes: number; seconds: number }
+```
+
+<ParamField path="milliseconds" type="number">
+  Time in milliseconds (typically from timeUntilStart)
+</ParamField>
+
+**Returns:** Object with `hours`, `minutes`, and `seconds` fields
+
+```typescript
+// src/utils/streamHelpers.ts:98-107
+export const formatCountdown = (
+  milliseconds: number
+): { hours: number; minutes: number; seconds: number } => {
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return { hours, minutes, seconds };
+};
+```
+
+**Usage Example:**
+
+```typescript
+const timeRemaining = 7265000; // 2 hours, 1 minute, 5 seconds
+const countdown = formatCountdown(timeRemaining);
+
+console.log(countdown);
+// { hours: 2, minutes: 1, seconds: 5 }
+
+// Display in UI
+<div>
+  {countdown.hours}h {countdown.minutes}m {countdown.seconds}s
+</div>
+```
+
+### getStatusLabel
+
+Returns a human-readable Spanish label for a stream status.
+
+```typescript
+export const getStatusLabel = (status: StreamStatus): string
+```
+
+<ParamField path="status" type="StreamStatus">
+  One of: "live", "upcoming", "recorded", or "scheduled"
+</ParamField>
+
+**Returns:** `string` - Localized status label in Spanish
+
+```typescript
+// src/utils/streamHelpers.ts:112-121
+export const getStatusLabel = (status: StreamStatus): string => {
+  const labels: Record<StreamStatus, string> = {
+    live: "EN VIVO",
+    upcoming: "PRÓXIMAMENTE",
+    recorded: "GRABACIÓN DISPONIBLE",
+    scheduled: "PRÓXIMAMENTE",
+  };
+
+  return labels[status];
+};
+```
+
+**Status Labels:**
+
+| Status | Label |
+|--------|-------|
+| live | EN VIVO |
+| upcoming | PRÓXIMAMENTE |
+| recorded | GRABACIÓN DISPONIBLE |
+| scheduled | PRÓXIMAMENTE |
+
+## Usage in Components
+
+The streamHelpers are primarily used in the LiveStreams component:
+
+```tsx
+// src/components/LiveStreams.tsx
+import { 
+  getStreamWithStatus, 
+  getEmbedUrl, 
+  getStatusLabel 
+} from '../utils/streamHelpers';
+
+// Enrich streams with status
+const enrichedStreams = STREAMS.map(getStreamWithStatus);
+
+// Filter out past streams without recordings
+const activeStreams = enrichedStreams.filter(
+  stream => stream.status !== "scheduled"
+);
+
+// Generate embed URL for modal
+const embedUrl = getEmbedUrl(selectedStream);
+
+// Display status badge
+<div className={styles.statusBadge}>
+  {getStatusLabel(stream.status)}
+</div>
+```
+
+## Type Dependencies
+
+These utilities work with types from `src/types/stream.ts`:
+
+```typescript
+import { Stream, StreamStatus, StreamWithStatus } from "../types/stream";
+```
+
+See [Stream Types](/reference/types#stream-types) for complete type definitions.
+
+## Date Handling
+
+<Warning>
+Date strings must be in ISO format (`YYYY-MM-DD`) and times in 24-hour format (`HH:MM`) for proper parsing.
+</Warning>
+
+Example valid date/time:
+```typescript
+{
+  date: "2025-12-10",      // ISO date format
+  startTime: "11:00",       // 24-hour time
+  endTime: "13:00"          // 24-hour time
+}
+```
+
+## Best Practices
+
+1. **Always use getStreamWithStatus** - Don't call getStreamStatus directly; use the wrapper that includes timeUntilStart
+2. **Check for empty embedUrl** - Always validate the result of getEmbedUrl before rendering an iframe
+3. **Filter scheduled streams** - Hide streams with "scheduled" status (past events without recordings)
+4. **Update countdown regularly** - Use setInterval to refresh formatCountdown every second
+5. **Handle timezone** - All times are in local timezone; consider UTC conversion for international events
+
+## Related Documentation
+
+- [Stream Types](/reference/types#stream-types) - Type definitions for Stream and StreamStatus
+- [LiveStreams Component](/components/livestreams) - Main consumer of these utilities
+- [Schedule Data](/reference/schedule-data) - Event schedule that aligns with stream times

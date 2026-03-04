@@ -1,0 +1,392 @@
+---
+title: CountdownClock Component
+description: Real-time countdown timer showing days, hours, minutes, and seconds until the event
+icon: clock
+---
+
+# CountdownClock Component
+
+The CountdownClock component displays a live countdown timer showing the time remaining until the DEV WEEK event starts. It features an initial counting animation and updates every second with smooth transitions.
+
+## Overview
+
+The CountdownClock component provides:
+- **Live countdown** - Updates every second showing days, hours, minutes, seconds
+- **Initial animation** - Numbers count up from 0 to current values on first render
+- **Change animations** - Values flash briefly when they update
+- **Target date** - Hardcoded to December 10, 2025 at 11:00 AM
+- **Zero handling** - Never displays negative values (shows 0 when event has passed)
+
+## File Location
+
+```
+~/workspace/source/src/components/CountdownClock.tsx
+~/workspace/source/src/components/CountdownClock.module.css
+```
+
+## Usage
+
+The CountdownClock is imported and rendered within the Hero component:
+
+```tsx
+// src/components/Hero.tsx
+import CountdownClock from "./CountdownClock";
+
+// Inside Hero component
+<div className={styles.eventDetailsWrapper}>
+  <CountdownClock />
+  
+  <div className={styles.eventInfo}>
+    {/* Event date/time/location */}
+  </div>
+</div>
+```
+
+## Props
+
+The CountdownClock component does not accept any props. The target date is hardcoded internally.
+
+## Configuration
+
+### Target Date
+
+The countdown target is defined as a constant:
+
+```typescript
+// src/components/CountdownClock.tsx:4
+const TARGET_DATE = new Date("2025-12-10T11:00:00").getTime();
+```
+
+To change the target date:
+```typescript
+const TARGET_DATE = new Date("2026-01-15T10:00:00").getTime();
+```
+
+### Labels
+
+Time unit labels are in Spanish:
+
+```typescript
+// src/components/CountdownClock.tsx:5-10
+const LABELS = [
+  { label: "Días", key: "dias" },
+  { label: "Horas", key: "horas" },
+  { label: "Min", key: "minutos" },
+  { label: "Seg", key: "segundos" },
+];
+```
+
+To translate to English:
+```typescript
+const LABELS = [
+  { label: "Days", key: "dias" },
+  { label: "Hours", key: "horas" },
+  { label: "Min", key: "minutos" },
+  { label: "Sec", key: "segundos" },
+];
+```
+
+## Features
+
+### 1. Time Calculation
+
+The `getTimeLeft()` function calculates remaining time:
+
+```typescript
+// src/components/CountdownClock.tsx:12-27
+function getTimeLeft() {
+  const now = new Date().getTime();
+  const distance = TARGET_DATE - now;
+  return {
+    dias: Math.max(0, Math.floor(distance / (1000 * 60 * 60 * 24))),
+    horas: Math.max(
+      0,
+      Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    ),
+    minutos: Math.max(
+      0,
+      Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+    ),
+    segundos: Math.max(0, Math.floor((distance % (1000 * 60)) / 1000)),
+  };
+}
+```
+
+**Calculations:**
+- **Days**: Total milliseconds ÷ (1000 × 60 × 60 × 24)
+- **Hours**: Remaining hours after days removed
+- **Minutes**: Remaining minutes after hours removed
+- **Seconds**: Remaining seconds after minutes removed
+
+All values use `Math.max(0, ...)` to prevent negative numbers.
+
+### 2. Initial Count-Up Animation
+
+On first render, numbers animate from 0 to their current values:
+
+```typescript
+// src/components/CountdownClock.tsx:42-70
+useEffect(() => {
+  if (hasAnimatedRef.current) return;
+
+  const initialTime = getTimeLeft();
+  const duration = 1500; // 1.5 seconds
+  const steps = 60;
+  const frameInterval = duration / steps;
+  let currentStep = 0;
+
+  const animationInterval = setInterval(() => {
+    currentStep++;
+    const progress = currentStep / steps;
+
+    setAnimatedTime({
+      dias: Math.floor(initialTime.dias * progress),
+      horas: Math.floor(initialTime.horas * progress),
+      minutos: Math.floor(initialTime.minutos * progress),
+      segundos: Math.floor(initialTime.segundos * progress),
+    });
+
+    if (currentStep >= steps) {
+      clearInterval(animationInterval);
+      setAnimatedTime(initialTime);
+      hasAnimatedRef.current = true;
+    }
+  }, frameInterval);
+
+  return () => clearInterval(animationInterval);
+}, []);
+```
+
+**Animation properties:**
+- **Duration**: 1500ms (1.5 seconds)
+- **Steps**: 60 frames for smooth animation
+- **Progress**: Linear from 0 to 1
+- **One-time**: `hasAnimatedRef` prevents re-animation
+
+### 3. Live Updates Every Second
+
+A separate effect updates the countdown every second:
+
+```typescript
+// src/components/CountdownClock.tsx:73-98
+useEffect(() => {
+  const interval = setInterval(() => {
+    const newTime = getTimeLeft();
+    setTimeLeft(newTime);
+    if (hasAnimatedRef.current) {
+      // Detect which values changed
+      const changedKeys: string[] = [];
+      (Object.keys(newTime) as Array<keyof typeof newTime>).forEach((key) => {
+        if (newTime[key] !== prevTimeRef.current[key]) {
+          changedKeys.push(key);
+        }
+      });
+
+      if (changedKeys.length > 0) {
+        setAnimatingKeys(changedKeys);
+        // Remove animation class after animation completes
+        setTimeout(() => setAnimatingKeys([]), 400);
+      }
+
+      setAnimatedTime(newTime);
+      prevTimeRef.current = newTime;
+    }
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
+```
+
+**Update logic:**
+1. Calculates new time every 1000ms
+2. Compares with previous values
+3. Identifies changed fields (e.g., seconds ticked)
+4. Applies animation class for 400ms
+5. Updates displayed values
+
+### 4. Change Detection Animation
+
+When a value changes, it briefly flashes with an animation:
+
+```tsx
+// src/components/CountdownClock.tsx:108-114
+<div
+  className={`${styles.value} ${
+    animatingKeys.includes(key) ? styles.valueAnimating : ""
+  }`}
+>
+  {animatedTime[key as keyof typeof animatedTime]}
+</div>
+```
+
+The `styles.valueAnimating` class (defined in CSS) applies a brief scale or color change effect.
+
+## Component Structure
+
+```tsx
+<div className={styles.countdownWrapper}>
+  <div className={styles.countdownHeader}>
+    <h3 className={styles.countdownTitle}>Comienza en</h3>
+  </div>
+  <div className={styles.clockGrid}>
+    {LABELS.map(({ label, key }) => (
+      <div key={key} className={styles.clockItem}>
+        <div className={styles.value}>
+          {animatedTime[key]}
+        </div>
+        <div className={styles.label}>{label}</div>
+      </div>
+    ))}
+  </div>
+</div>
+```
+
+**Layout:**
+- `countdownWrapper` - Container for entire countdown
+- `countdownHeader` - "Comienza en" title
+- `clockGrid` - Grid layout for 4 time units
+- `clockItem` - Individual time unit (day/hour/min/sec)
+- `value` - Large numeric display
+- `label` - Small unit label below number
+
+## State Management
+
+The component uses three pieces of state:
+
+```typescript
+const [timeLeft, setTimeLeft] = useState(getTimeLeft());
+const [animatedTime, setAnimatedTime] = useState({
+  dias: 0, horas: 0, minutos: 0, segundos: 0
+});
+const [animatingKeys, setAnimatingKeys] = useState<string[]>([]);
+```
+
+- **timeLeft** - Current actual countdown values (updated every second)
+- **animatedTime** - Values displayed to user (animated during initial count-up)
+- **animatingKeys** - Which fields are currently animating (for CSS class)
+
+And two refs:
+
+```typescript
+const hasAnimatedRef = useRef(false);
+const prevTimeRef = useRef(animatedTime);
+```
+
+- **hasAnimatedRef** - Prevents re-running initial animation
+- **prevTimeRef** - Stores previous values for change detection
+
+## Dependencies
+
+- **React** - useState, useEffect, useRef hooks
+- **CSS Modules** - CountdownClock.module.css for styling
+
+## Styling
+
+The component uses:
+- **CSS Modules** for scoped styles
+- **Grid layout** for responsive 4-column display
+- **CSS animations** for value change effects
+- **Large typography** for numbers
+- **Smaller labels** for units
+
+## Customization
+
+### Change Target Date
+
+Edit the TARGET_DATE constant:
+
+```typescript
+const TARGET_DATE = new Date("2026-03-15T09:00:00").getTime();
+```
+
+### Translate Labels
+
+Update the LABELS array:
+
+```typescript
+const LABELS = [
+  { label: "Days", key: "dias" },
+  { label: "Hrs", key: "horas" },
+  { label: "Min", key: "minutos" },
+  { label: "Sec", key: "segundos" },
+];
+```
+
+### Adjust Animation Speed
+
+Modify animation durations:
+
+```typescript
+// Initial count-up animation
+const duration = 2000; // Change from 1500 to 2000ms
+
+// Change flash duration
+setTimeout(() => setAnimatingKeys([]), 600); // Change from 400 to 600ms
+```
+
+### Change Update Frequency
+
+Modify interval timing:
+
+```typescript
+const interval = setInterval(() => {
+  // ... update logic
+}, 500); // Update twice per second instead of once
+```
+
+<Warning>
+Updating more frequently than once per second will cause seconds to appear to skip values since the smallest unit is 1 second.
+</Warning>
+
+## Accessibility
+
+- **Semantic HTML** - Uses `<h3>` for title, `<div>` for structure
+- **Readable content** - Large, high-contrast numbers
+- **No motion dependency** - Information is always visible, animation is enhancement
+- **ARIA labels** - Could be improved by adding `aria-live="polite"` to wrapper
+
+### Suggested Improvement
+
+```tsx
+<div className={styles.countdownWrapper} aria-live="polite" aria-atomic="true">
+  <span className="sr-only">
+    El evento comienza en {animatedTime.dias} días, 
+    {animatedTime.horas} horas, {animatedTime.minutos} minutos, 
+    y {animatedTime.segundos} segundos
+  </span>
+  {/* Visual countdown */}
+</div>
+```
+
+## Performance
+
+- **Efficient updates** - Only re-renders when values change
+- **Cleanup** - Both intervals cleared on unmount
+- **One-time initial animation** - Ref prevents repeated animations
+- **Selective animation** - Only animates changed values, not entire component
+
+## Related Components
+
+- [Hero](/components/hero) - Parent component that displays the countdown
+- [Schedule](/components/schedule) - Shows the detailed event timeline
+
+## Time Zone Handling
+
+<Note>
+The countdown uses the user's local timezone. If your event is in a specific timezone, consider using a library like `date-fns-tz` or specify timezone explicitly:
+
+```typescript
+const TARGET_DATE = new Date("2025-12-10T11:00:00-05:00").getTime(); // UTC-5
+```
+</Note>
+
+## Testing
+
+To test the countdown behavior:
+
+```typescript
+// Set target to 2 minutes in the future for testing
+const TARGET_DATE = new Date(Date.now() + 2 * 60 * 1000).getTime();
+```
+
+This allows you to see the countdown reach zero and verify it stops at 0 without going negative.
